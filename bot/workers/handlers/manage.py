@@ -1,5 +1,3 @@
-import time
-
 from bot.config import bot
 from bot.utils.log_utils import logger
 from bot.utils.msg_utils import user_is_owner

@@ -6,6 +6,7 @@ from pathlib import Path
 from subprocess import check_output
 from subprocess import run as bashrun
 
+
 def update():
     print("Default var for upstream repo & branch will used if none were given!")
     ALWAYS_DEPLOY_LATEST = config(

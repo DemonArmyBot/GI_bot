@@ -5,6 +5,7 @@ from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, InputMedi
 from bot.utils.bot_utils import get_json
 from bot.utils.log_utils import log, logger
 from bot.utils.msg_utils import pm_is_allowed, user_is_allowed, user_is_owner
+
 meme_list = []
 
 
@@ -49,13 +50,17 @@ async def getmeme(event, args, client, edit=False):
             return
     link = "https://meme-api.com/gimme"
     try:
-        ref_button = InlineKeyboardButton(text="Refresh", callback_data=f"refmeme:{user}{'_'+args if args else str()}")
+        ref_button = InlineKeyboardButton(
+            text="Refresh", callback_data=f"refmeme:{user}{'_'+args if args else str()}"
+        )
         reply_markup = InlineKeyboardMarkup([[ref_button]])
         if args:
             link += f"/{args}" if not args.isdigit() else str()
         caption, url, filename, nsfw = gen_meme(link)
         if not edit:
-            return await event.reply_photo(caption=caption, photo=url, has_spoiler=nsfw, reply_markup=reply_markup)
+            return await event.reply_photo(
+                caption=caption, photo=url, has_spoiler=nsfw, reply_markup=reply_markup
+            )
         photo = InputMediaPhoto(media=url, caption=caption, has_spoiler=nsfw)
         return await event.edit_media(photo, reply_markup=reply_markup)
         # time.sleep(3)

@@ -1,8 +1,12 @@
 import argparse
 import re
+import shutil
+import urllib.request
 
 from bot.config import bot, conf
 from bot.others.exceptions import ArgumentParserError
+
+from .os_utils import s_remove
 
 # from .log_utils import log, logger
 
@@ -25,6 +29,7 @@ def user_is_dev(user):
 def pm_is_allowed(event):
     if event.chat.type.value == "private":
         return not bot.ignore_pm
+
 
 
 class ThrowingArgumentParser(argparse.ArgumentParser):
@@ -50,6 +55,7 @@ def get_args(*args, to_parse: str, get_unknown=False):
         unknown = " ".join(map(str, unknowns))
         return flag, unknown
     return flag
+
 
 
 async def event_handler(

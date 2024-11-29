@@ -1,11 +1,10 @@
-from pyrogram.filters import regex
-from pyrogram.handlers import CallbackQueryHandler
-
 from bot import bot
-from bot.utils.log_utils import logger
+from bot.utils.log_utils import log, logger
 
 from .stuff import getmeme
 
+from pyrogram.filters import regex
+from pyrogram.handlers import CallbackQueryHandler
 
 async def refmeme(client, query):
     try:
@@ -21,4 +20,6 @@ async def refmeme(client, query):
         await logger(Exception)
 
 
-bot.client.add_handler(CallbackQueryHandler(refmeme, filters=regex("^refmeme")))
+bot.client.add_handler(
+    CallbackQueryHandler(refmeme, filters=regex("^refmeme"))
+)

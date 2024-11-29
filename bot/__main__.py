@@ -1,12 +1,10 @@
 from . import LOGS, bot
-
 from .startup.after import on_startup
 from .utils.msg_utils import event_handler
-from .workers.handlers.dev import eval_message, get_logs, bash
-from .workers.handlers.stuff import getmeme, hello 
+from .workers.handlers.dev import bash, eval_message, get_logs
 from .workers.handlers.gi import enka_handler
 from .workers.handlers.manage import pause_handler, restart_handler, update_handler
-
+from .workers.handlers.stuff import getmeme, hello
 
 
 @bot.client.on_message(filters.incoming & filters.command(["start", "help"]))
@@ -37,6 +35,7 @@ async def _(client, message):
 @bot.client.on_message(filters.incoming & filters.command("enka"))
 async def _(client, message):
     await event_handler(message, enka_handler, require_args=True)
+
 
 @bot.client.on_message(filters.incoming & filters.command("meme"))
 async def _(client, message):

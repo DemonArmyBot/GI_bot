@@ -1,5 +1,4 @@
 import asyncio
-import time
 
 from bot.utils.gi_utils import (
     enka_update,
@@ -9,7 +8,7 @@ from bot.utils.gi_utils import (
     get_enka_profile2,
     get_gi_info,
 )
-from bot.utils.log_utils import log, logger
+from bot.utils.log_utils import logger
 from bot.utils.msg_utils import get_args
 from bot.utils.os_utils import s_remove
 
@@ -104,8 +103,8 @@ async def enka_handler(event, args, client):
             char_id = info.get("id")
             result, error = (
                 await get_enka_card(
-                        args, char_id, akasha=akasha, huid=arg.hide_uid, template=arg.t
-                    )
+                    args, char_id, akasha=akasha, huid=arg.hide_uid, template=arg.t
+                )
                 if not arg.v2
                 else await get_enka_card2(args, char_id, arg.hide_uid)
             )
@@ -137,9 +136,9 @@ async def enka_handler(event, args, client):
                 return await event.reply(error_txt)
             ids = ids.strip(",")
             result, error = (
-                    await get_enka_card(
-                        args, ids, akasha=akasha, huid=arg.hide_uid, template=arg.t
-                    )
+                await get_enka_card(
+                    args, ids, akasha=akasha, huid=arg.hide_uid, template=arg.t
+                )
                 if not arg.v2
                 else await get_enka_card2(args, ids, huid=arg.hide_uid)
             )
@@ -152,8 +151,8 @@ async def enka_handler(event, args, client):
         if dump:
             result, error = (
                 await get_enka_card(
-                        args, None, akasha=akasha, huid=arg.hide_uid, template=arg.t
-                    )
+                    args, None, akasha=akasha, huid=arg.hide_uid, template=arg.t
+                )
                 if not arg.v2
                 else await get_enka_card2(args, str(), huid=arg.hide_uid)
             )
@@ -169,7 +168,7 @@ async def enka_handler(event, args, client):
 
 async def send_multi_cards(event, results, profile):
     for card in results.card:
-        print(card.name) #best debugger?
+        print(card.name)  # best debugger?
         caption = f"{profile.player.name}'s current {card.name} build"
         file_name = caption + ".png"
         path = "enka/" + file_name

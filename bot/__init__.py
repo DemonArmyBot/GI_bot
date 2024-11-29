@@ -17,7 +17,7 @@ from pyrogram import errors as pyro_errors
 from pyrogram import filters
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
-from .config import conf, bot
+from .config import bot, conf
 
 uptime = time.time()
 version_file = "version.txt"

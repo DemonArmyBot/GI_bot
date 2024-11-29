@@ -1,5 +1,3 @@
-import asyncio
-
 import aiohttp
 from encard import encard, update_namecard
 from enkacard import enc_error, encbanner

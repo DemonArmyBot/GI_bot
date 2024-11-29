@@ -9,7 +9,7 @@ from bot.utils.msg_utils import user_is_dev, user_is_owner
 from bot.utils.os_utils import s_remove
 
 
-async def send_logs(message, args, client):
+async def get_logs(message, args, client):
     if not message.from_user:
         return
     if not user_is_owner(message.from_user.id):

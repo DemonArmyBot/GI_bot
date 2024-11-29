@@ -62,3 +62,10 @@ async def getmeme(event, args, client, edit=False):
     except Exception as e:
         await logger(Exception)
         return await event.reply(f"*Error:*\n{e}")
+
+
+async def hello(event, args, client):
+    try:
+        await event.reply("Hi!")
+    except Exception:
+        await logger(Exception)

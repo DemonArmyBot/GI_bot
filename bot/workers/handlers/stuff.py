@@ -1,9 +1,7 @@
-import asyncio
-
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, InputMediaPhoto
 
 from bot.utils.bot_utils import get_json
-from bot.utils.log_utils import log, logger
+from bot.utils.log_utils import logger
 from bot.utils.msg_utils import pm_is_allowed, user_is_allowed, user_is_owner
 
 meme_list = []
@@ -27,7 +25,7 @@ def gen_meme(link):
         meme_list.append(pl)
         sb = result.get("subreddit")
         nsfw = result.get("nsfw")
-        nsfw_text = '**🔞 NSFW**\n'
+        nsfw_text = "**🔞 NSFW**\n"
         caption = f"{nsfw_text if nsfw else str()}**{title.strip()}**\n{pl}\n\nBy u/{author} in r/{sb}"
         url = result.get("url")
         filename = f"{_id}.{url.split('.')[-1]}"

@@ -1,6 +1,7 @@
 import argparse
 import re
 
+from bot import pyro_errors
 from bot.config import bot, conf
 from bot.others.exceptions import ArgumentParserError
 
@@ -50,6 +51,20 @@ def get_args(*args, to_parse: str, get_unknown=False):
         unknown = " ".join(map(str, unknowns))
         return flag, unknown
     return flag
+
+
+async def reply_message(message, text, quote=True):
+    """A function to reply messages with a loop in the event of FloodWait"""
+    try:
+        replied = await message.reply(text, quote=quote)
+    except pyro_errors.FloodWait as e:
+        log(
+            e=f"Sleeping for {e.value}s due to floodwait!"
+            "\n"
+            f"Caused by: {gfn(reply_message)}"
+        )
+        await asyncio.sleep(e.value)
+        return await reply_message(message, text, quote)
 
 
 async def event_handler(

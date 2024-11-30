@@ -29,6 +29,7 @@ class Config:
                 "BANNED",
                 default=str(),
             )
+            self.BOT_TOKEN = config("BOT_TOKEN", default="")
             self.DATABASE_URL = config("DATABASE_URL", default=None)
             self.DBNAME = config("DBNAME", default="ENC")
             self.DEV = config("DEV", default=0, cast=int)
@@ -38,6 +39,7 @@ class Config:
                 "OWNER",
                 default=str(),
             )
+            self.WORKERS = config("WORKERS", default=5, cast=int)
         except Exception:
             print("Environment vars Missing; or")
             print("Something went wrong:")

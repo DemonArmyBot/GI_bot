@@ -53,10 +53,10 @@ LOGS.info("Starting...")
 try:
     bot.client = Client(
         "GI",
-        api_id=APP_ID,
-        api_hash=API_HASH,
-        bot_token=BOT_TOKEN,
-        workers=3,
+        api_id=conf.APP_ID,
+        api_hash=conf.API_HASH,
+        bot_token=conf.BOT_TOKEN,
+        workers=conf.WORKERS,
     )
 except Exception:
     LOGS.critical(traceback.format_exc())

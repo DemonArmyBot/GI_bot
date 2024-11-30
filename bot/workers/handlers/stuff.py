@@ -7,7 +7,7 @@ from bot.utils.msg_utils import pm_is_allowed, user_is_allowed, user_is_owner
 meme_list = []
 
 
-def gen_meme(link):
+async def gen_meme(link):
     i = 1
     while True:
         result = await get_json(link)
@@ -55,7 +55,7 @@ async def getmeme(event, args, client, edit=False):
         reply_markup = InlineKeyboardMarkup([[ref_button]])
         if args:
             link += f"/{args}" if not args.isdigit() else str()
-        caption, url, filename, nsfw = gen_meme(link)
+        caption, url, filename, nsfw = await gen_meme(link)
         if not edit:
             return await event.reply_photo(
                 caption=caption, photo=url, has_spoiler=nsfw, reply_markup=reply_markup

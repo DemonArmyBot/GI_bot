@@ -50,7 +50,7 @@ async def getmeme(event, args, client, edit=False):
     link = "https://meme-api.com/gimme"
     try:
         ref_button = InlineKeyboardButton(
-            text="Refresh", callback_data=f"refmeme:{user}{'_'+args if args else str()}"
+            text="Refresh", callback_data=f"refmeme {user}{'_'+args if args else str()}"
         )
         reply_markup = InlineKeyboardMarkup([[ref_button]])
         if args:

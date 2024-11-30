@@ -9,8 +9,9 @@ from .stuff import getmeme
 
 async def refmeme(client, query):
     try:
-        data, args = query.data.split("_", maxsplit=1)
-        user = data.split(":")[-1]
+        data, info = query.data.split(maxsplit=1)
+        usearg = info.split("_", maxsplit=1)
+        user, args = usearg if len(usearg) == 2 else (usearg, None)
         if not query.from_user.id == int(user):
             return await query.answer(
                 "You're not allowed to do this!", show_alert=False

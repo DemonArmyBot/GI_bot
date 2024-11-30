@@ -23,7 +23,7 @@ class Config:
             self.ALWAYS_DEPLOY_LATEST = config(
                 "ALWAYS_DEPLOY_LATEST", default=False, cast=bool
             )
-            self.API_KEY = config("API_KEY", default="")
+            self.API_ID = config("API_ID", default="")
             self.API_HASH = config("API_HASH", default="")
             self.BANNED = config(
                 "BANNED",

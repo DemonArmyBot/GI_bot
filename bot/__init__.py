@@ -53,7 +53,7 @@ LOGS.info("Starting...")
 try:
     bot.client = Client(
         "GI",
-        api_id=conf.APP_ID,
+        api_id=conf.API_ID,
         api_hash=conf.API_HASH,
         bot_token=conf.BOT_TOKEN,
         workers=conf.WORKERS,

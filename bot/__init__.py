@@ -41,13 +41,13 @@ LOGS = logging.getLogger(__name__)
 
 if os.path.exists(version_file):
     with open(version_file, "r") as file:
-        _bot.version = file.read().strip()
+        bot.version = file.read().strip()
 
 if sys.version_info < (3, 10):
     LOGS.critical("Please use Python 3.10+")
     exit(1)
 
-LOGS.info(f"Bot version: {_bot.version}")
+LOGS.info(f"Bot version: {bot.version}")
 LOGS.info("Starting...")
 
 try:

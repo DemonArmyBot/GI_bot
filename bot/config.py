@@ -52,6 +52,7 @@ class Runtime_Config:
         self.banned = None
         self.client = None
         self.ignore_pm = False
+        self.max_message_length = 4096
         self.offline = False
         self.paused = False
         self.version = None

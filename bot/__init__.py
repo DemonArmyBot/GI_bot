@@ -51,6 +51,8 @@ if sys.version_info < (3, 10):
 LOGS.info(f"Bot version: {bot.version}")
 LOGS.info("Starting...")
 
+bot.ignore_pm = conf.IGNORE_PM
+
 try:
     bot.client = Client(
         "GI",

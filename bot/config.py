@@ -49,7 +49,7 @@ class Config:
 
 class Runtime_Config:
     def __init__(self):
-        self.banned = None
+        self.banned = []
         self.client = None
         self.ignore_pm = False
         self.max_message_length = 4096

@@ -20,10 +20,11 @@ from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from .config import bot, conf
 
 uptime = time.time()
+log_file_name = "logs.txt"
 version_file = "version.txt"
 
-if os.path.exists("logs.txt"):
-    with open("logs.txt", "r+") as f_d:
+if os.path.exists(log_file_name):
+    with open(log_file_name, "r+") as f_d:
         f_d.truncate(0)
 
 logging.basicConfig(
@@ -31,7 +32,7 @@ logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     datefmt="%d-%b-%y %H:%M:%S",
     handlers=[
-        RotatingFileHandler("logs.txt", maxBytes=2097152000, backupCount=10),
+        RotatingFileHandler(log_file_name, maxBytes=2097152000, backupCount=10),
         logging.StreamHandler(),
     ],
 )

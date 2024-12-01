@@ -2,7 +2,7 @@ from pyrogram.filters import regex
 from pyrogram.handlers import CallbackQueryHandler
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, InputMediaPhoto
 
-from bot import bot
+from bot import bot, pyro_errors
 from bot.utils.bot_utils import get_json
 from bot.utils.log_utils import logger
 from bot.utils.msg_utils import pm_is_allowed, user_is_allowed, user_is_owner
@@ -66,6 +66,12 @@ async def getmeme(event, args, client, edit=False, user=None):
         photo = InputMediaPhoto(media=url, caption=caption, has_spoiler=nsfw)
         return await event.edit_media(photo, reply_markup=reply_markup)
         # time.sleep(3)
+    except pyro_errors.BadRequest as e:
+        print(dir(e))
+        if e.id == "MEDIA_EMPTY":
+            return await getmeme(event, args, client, edit, user)
+        await logger(Exception)
+        return await event.reply(f"**Error:**\n`{e}`")
     except Exception as e:
         await logger(Exception)
         return await event.reply(f"**Error:**\n`{e}`")

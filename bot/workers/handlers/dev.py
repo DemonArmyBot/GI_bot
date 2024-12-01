@@ -66,7 +66,7 @@ async def bash(event, cmd, client):
             )
             return await event.delete()
     else:
-        OUTPUT = f"<pre>\n<code class='language-bash'>{html.escape(cmd)}</code>\n</pre>\n<i>PID:</i>\n{process.pid}\n\n<pre>\n<code class='language-Stderr:'>{e}</code>\n</pre>\n<pre>\n<code class='language-Output:'>{html.escape(o)}</code>\n</pre>"
+        OUTPUT = f"```bash\n{html.escape(cmd)}```\n\n__PID:__\n{process.pid}\n\n```Stderr:\n{e}```\n\n```Output:\n{html.escape(o)}```\n"
         await event.reply(OUTPUT)
 
 

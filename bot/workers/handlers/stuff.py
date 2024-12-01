@@ -67,8 +67,9 @@ async def getmeme(event, args, client, edit=False, user=None):
         return await event.edit_media(photo, reply_markup=reply_markup)
         # time.sleep(3)
     except pyro_errors.BadRequest as e:
-        print(dir(e))
-        if e.id == "MEDIA_EMPTY":
+        print(e.ID)
+        print(e.value)
+        if e.value == "MEDIA_EMPTY":
             return await getmeme(event, args, client, edit, user)
         await logger(Exception)
         return await event.reply(f"**Error:**\n`{e}`")

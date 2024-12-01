@@ -69,7 +69,7 @@ async def bash(event, cmd, client):
             return await event.delete()
     else:
         OUTPUT = f"<pre>\n<code class='language-bash'>{html.escape(cmd)}</code>\n</pre>\n<i>PID:</i>\n{process.pid}\n\n<pre>\n<code class='language-Stderr:'>{e}</code>\n</pre>\n<pre>\n<code class='language-Output:'>{html.escape(o)}</code>\n</pre>"
-        await event.reply(OUTPUT, parse_mode=ParseMode.HTML)
+        await event.reply(OUTPUT)
 
 
 async def aexec2(code, client, message):
@@ -126,8 +126,8 @@ async def eval_message(message, cmd, client):
         evaluation = "Success"
 
     final_output = "```python\n{}```\n\n```Output:\n{}```\n".format(
-        cmd, evaluation.strip()
-    )
+        cmd, html.escape(evaluation.strip()
+    ))
 
     if len(final_output) > bot.max_message_length:
         final_output = "Evaluated:\n{}\n\nOutput:\n{}".format(cmd, evaluation.strip())

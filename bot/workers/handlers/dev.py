@@ -4,8 +4,6 @@ import io
 import sys
 import traceback
 
-from pyrogram.enums import ParseMode
-
 from bot.config import bot
 from bot.utils.msg_utils import user_is_dev, user_is_owner
 from bot.utils.os_utils import s_remove
@@ -126,8 +124,8 @@ async def eval_message(message, cmd, client):
         evaluation = "Success"
 
     final_output = "```python\n{}```\n\n```Output:\n{}```\n".format(
-        cmd, html.escape(evaluation.strip()
-    ))
+        cmd, html.escape(evaluation.strip())
+    )
 
     if len(final_output) > bot.max_message_length:
         final_output = "Evaluated:\n{}\n\nOutput:\n{}".format(cmd, evaluation.strip())

@@ -26,6 +26,7 @@ def user_is_dev(user):
 def pm_is_allowed(event):
     if event.chat.type.value == "private":
         return not bot.ignore_pm
+    return True
 
 
 class ThrowingArgumentParser(argparse.ArgumentParser):

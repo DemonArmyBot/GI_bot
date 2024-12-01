@@ -23,7 +23,7 @@ async def gen_meme(link):
         i += 1
         if pl in meme_list:
             continue
-        if len(meme_list) > 100:
+        if len(meme_list) > 10000:
             meme_list.clear()
         meme_list.append(pl)
         sb = result.get("subreddit")
@@ -68,7 +68,7 @@ async def getmeme(event, args, client, edit=False, user=None):
         # time.sleep(3)
     except Exception as e:
         await logger(Exception)
-        return await event.reply(f"*Error:*\n{e}")
+        return await event.reply(f"**Error:**\n`{e}`")
 
 
 async def refmeme(client, query):

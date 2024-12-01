@@ -4,6 +4,7 @@ import io
 import sys
 import traceback
 
+from pyrogram.enums import ParseMode
 from bot.config import bot
 from bot.utils.msg_utils import user_is_dev, user_is_owner
 from bot.utils.os_utils import s_remove
@@ -67,7 +68,7 @@ async def bash(event, cmd, client):
             return await event.delete()
     else:
         OUTPUT = f"<pre>\n<code class='language-bash'>{html.escape(cmd)}</code>\n</pre>\n<i>PID:</i>\n{process.pid}\n\n<pre>\n<code class='language-Stderr:'>{e}</code>\n</pre>\n<pre>\n<code class='language-Output:'>{html.escape(o)}</code>\n</pre>"
-        await event.reply(OUTPUT, parse_mode="html")
+        await event.reply(OUTPUT, parse_mode=ParseMode.HTML)
 
 
 async def aexec2(code, client, message):

@@ -4,7 +4,7 @@ import io
 import sys
 import traceback
 
-from bot.config import bot, log_file_name
+from bot import bot, log_file_name
 from bot.utils.bot_utils import split_text
 from bot.utils.msg_utils import get_args, user_is_dev, user_is_owner
 from bot.utils.os_utils import read_n_to_last_line, s_remove

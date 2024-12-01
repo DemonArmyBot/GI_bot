@@ -92,7 +92,7 @@ async def enka_handler(event, args, client):
             file_name = caption + ".png"
             path = "enka/" + file_name
             cprofile.card.save(path)
-            await event.reply_photo(photo=path, caption=f"*{caption}*")
+            await event.reply_photo(photo=path, caption=f"**{caption}**")
             return s_remove(path)
         if card:
             info = await get_gi_info(query=card)
@@ -114,10 +114,10 @@ async def enka_handler(event, args, client):
             file_name = caption + ".png"
             path = "enka/" + file_name
             if not result.card:
-                error = f"*{card} not found in showcase!*"
+                error = f"**{card} not found in showcase!**"
                 return
             result.card[0].card.save(path)
-            await event.reply_photo(photo=path, caption=f"*{caption}*")
+            await event.reply_photo(photo=path, caption=f"**{caption}**")
             return s_remove(path)
         if cards:
             ids = str()
@@ -163,7 +163,7 @@ async def enka_handler(event, args, client):
         await logger(Exception)
     finally:
         if error:
-            return await event.reply(f"*Error:*\n{error}")
+            return await event.reply(f"**Error:**\n{result}")
 
 
 async def send_multi_cards(event, results, profile):

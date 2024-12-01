@@ -36,7 +36,7 @@ async def gen_meme(link):
     return caption, url, filename, nsfw
 
 
-async def getmeme(event, args, client, edit=False):
+async def getmeme(event, args, client, edit=False, user=None):
     """
     Fetches a random meme from reddit
     Uses meme-api.com
@@ -44,8 +44,8 @@ async def getmeme(event, args, client, edit=False):
     Arguments:
     subreddit - custom subreddit
     """
-    user = event.from_user.id
-    if not (edit or user_is_owner(user)):
+    user = user or event.from_user.id
+    if not user_is_owner(user):
         if not pm_is_allowed(event):
             return
         if not user_is_allowed(user):
@@ -81,7 +81,7 @@ async def refmeme(client, query):
                 "You're not allowed to do this!", show_alert=False
             )
         await query.answer("Refreshing…", show_alert=False)
-        return await getmeme(query.message, args, None, True)
+        return await getmeme(query.message, args, None, True, user)
     except Exception:
         await logger(Exception)
 

@@ -6,18 +6,19 @@ import traceback
 
 from bot import bot, log_file_name
 from bot.utils.bot_utils import split_text
+from bot.utils.log_utils import logger
 from bot.utils.msg_utils import get_args, user_is_dev, user_is_owner
 from bot.utils.os_utils import read_n_to_last_line, s_remove
 
 
-async def get_logs(message, args, client):
-    if not message.from_user:
+async def get_logs(event, args, client):
+    if not event.from_user:
         return
-    if not user_is_owner(message.from_user.id):
+    if not user_is_owner(event.from_user.id):
         return
     try:
         if not args:
-            await message.reply_document(
+            await event.reply_document(
                 document=log_file_name,
                 quote=True,
                 caption=log_file_name,

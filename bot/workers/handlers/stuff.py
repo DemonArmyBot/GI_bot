@@ -18,7 +18,7 @@ async def gen_meme(link):
         title = result.get("title")
         author = result.get("author")
         pl = result.get("postLink")
-        if i > 20:
+        if i > 100:
             raise Exception("Request Timeout!")
         i += 1
         if pl in meme_list:

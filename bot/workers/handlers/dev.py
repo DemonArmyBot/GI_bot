@@ -34,7 +34,7 @@ async def get_logs(event, args, client):
             pre_event = event
             for smsg in split_text(msg):
                 smsg = f"```\n{smsg}\n```"
-                pre_event = pre_event.reply(smsg, quote=True)
+                pre_event = await pre_event.reply(smsg, quote=True)
                 await asyncio.sleep(2)
         else:
             return await get_logs(event, None, client)

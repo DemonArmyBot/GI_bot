@@ -78,7 +78,7 @@ async def rss_handler(event, args, client):
         for additional help send the above arguments with -h/--help or without additional params.
         *listed in the order priority.
     """
-    if not user_is_owner(event.sender_id):
+    if not user_is_owner(event.from_user.id):
         return await try_delete(event)
     arg, args = get_args(
         ["-d", "store_true"],
@@ -113,7 +113,7 @@ async def rss_list(event, args, client):
         Returns:
             List of subscribed rss feeds.
     """
-    if not user_is_owner(event.sender_id):
+    if not user_is_owner(event.from_user.id):
         return
     if not bot.rss_dict:
         return await event.reply(
@@ -151,7 +151,7 @@ async def rss_get(event, args, client):
         [Title] - Title used in subscribing rss
         -a [Amount] - Amount of links to grab
     """
-    if not user_is_owner(event.sender_id):
+    if not user_is_owner(event.from_user.id):
         return
     arg, args = get_args(
         "-a",
@@ -222,7 +222,7 @@ async def rss_editor(event, args, client):
         Returns:
             success message on successfully editing the rss configuration
     """
-    if not user_is_owner(event.sender_id):
+    if not user_is_owner(event.from_user.id):
         return
     arg, args = get_args(
         "-l",
@@ -305,7 +305,7 @@ async def del_rss(event, args, client):
             Success message on successfull removal
             Not found message if TITLE passed was not found
     """
-    if not user_is_owner(event.sender_id):
+    if not user_is_owner(event.from_user.id):
         return
     if not bot.rss_dict.get(args):
         return await event.reply(f"'{args}' not found in list of subscribed rss feeds!")
@@ -336,7 +336,7 @@ async def rss_sub(event, args, client):
         Returns:
             success message on successfully editing the rss configuration
     """
-    if not user_is_owner(event.sender_id):
+    if not user_is_owner(event.from_user.id):
         return
     arg, args = get_args(
         "-t",

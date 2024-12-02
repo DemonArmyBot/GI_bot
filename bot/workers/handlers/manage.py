@@ -1,9 +1,16 @@
 from bot.config import bot
 from bot.utils.bot_utils import list_to_str, split_text
 from bot.utils.log_utils import logger
-from bot.utils.msg_utils import avoid_flood, event_handler, get_args, try_delete, user_is_owner
+from bot.utils.msg_utils import (
+    avoid_flood,
+    event_handler,
+    get_args,
+    try_delete,
+    user_is_owner,
+)
 from bot.utils.os_utils import re_x, updater
 from bot.utils.rss_utils import schedule_rss, scheduler
+
 
 async def restart_handler(event, args, client):
     """Restarts bot. (To avoid issues use /update instead.)"""
@@ -109,7 +116,9 @@ async def rss_list(event, args, client):
     if not user_is_owner(event.sender_id):
         return
     if not bot.rss_dict:
-        return await event.reply("**No subscriptions!**", )
+        return await event.reply(
+            "**No subscriptions!**",
+        )
     list_feed = str()
     pre_event = event
 
@@ -120,14 +129,12 @@ async def rss_list(event, args, client):
 
     async with rss_dict_lock:
         for i, (title, data) in zip(itertools.count(1), list(_bot.rss_dict.items())):
-            list_feed += f"\n\n{i}. **Title:** `{title}`\n**Feed Url: **`{data['link']}`\n"
+            list_feed += (
+                f"\n\n{i}. **Title:** `{title}`\n**Feed Url: **`{data['link']}`\n"
+            )
             list_feed += f"**Chat:** `{list_to_str(data['chat']) or 'Default'}`\n"
-            list_feed += (
-                f"**Include filter:** `{parse_filter(data['inf'])}`\n"
-            )
-            list_feed += (
-                f"**Exclude filter:** `{parse_filter(data['exf'])}`\n"
-            )
+            list_feed += f"**Include filter:** `{parse_filter(data['inf'])}`\n"
+            list_feed += f"**Exclude filter:** `{parse_filter(data['exf'])}`\n"
             list_feed += f"**Paused:** `{data['paused']}`"
 
     lmsg = split_text(list_feed.strip("\n"), "\n\n", True)
@@ -166,7 +173,8 @@ async def rss_get(event, args, client):
         return await event.reply(f"`{rss_get.__doc__}`")
     try:
         imsg = await event.reply(
-            f"Getting the last **{count}** item(s) from {title}...", quote=True,
+            f"Getting the last **{count}** item(s) from {title}...",
+            quote=True,
         )
         pre_event = imsg
         rss_d = feedparse(data["link"])
@@ -231,20 +239,12 @@ async def rss_editor(event, args, client):
         return await event.reply(f"Please pass the title of the rss item to edit")
     if not (data := bot.rss_dict.get(args)):
         return await event.reply(f"Could not find rss with title - {args}.")
-    if not (
-        arg.l
-        or arg.exf
-        or arg.inf
-        or arg.p
-        or arg.r
-        or arg.chat
-    ):
+    if not (arg.l or arg.exf or arg.inf or arg.p or arg.r or arg.chat):
         return await event.reply("Please supply at least one additional arguement.")
     if arg.chat:
         for chat in arg.chat.split():
             chat = chat.split(":")[0]
-            if not (chat.lstrip("-").isdigit() or chat.casefold() == "default"
-    ):
+            if not (chat.lstrip("-").isdigit() or chat.casefold() == "default"):
                 return await avoid_flood(
                     event.reply,
                     f"Chat must be a Telegram chat id (with -100 if a group or channel) or default\nNot '{chat}'",
@@ -370,7 +370,7 @@ async def rss_sub(event, args, client):
     exf_lists = []
     msg = str()
     # if arg.chat:
-        # arg.chat = int(arg.chat)
+    # arg.chat = int(arg.chat)
     if arg.inf:
         filters_list = arg.inf.split("|")
         for x in filters_list:

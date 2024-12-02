@@ -6,6 +6,7 @@ from bot.fun.quips import enquip, enquip2
 from bot.utils.log_utils import logger
 from bot.utils.rss_utils import scheduler
 
+
 async def onrestart():
     try:
         if sys.argv[1] == "restart":

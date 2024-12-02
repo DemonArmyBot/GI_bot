@@ -1,5 +1,4 @@
 import pickle
-import shutil
 
 from pymongo import MongoClient
 
@@ -64,11 +63,7 @@ if conf.DATABASE_URL:
     load_db(rssdb, "rss", bot.rss_dict, "dict")
 
 
-
 else:
     rssdb = userdb = None
 
     load_local_db()
-
-
-

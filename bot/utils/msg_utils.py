@@ -5,6 +5,7 @@ from bot import pyro_errors
 from bot.config import bot, conf
 from bot.fun.quips import enquip3
 from bot.others.exceptions import ArgumentParserError
+
 from .bot_utils import gfn
 from .log_utils import log, logger
 
@@ -41,11 +42,19 @@ async def send_rss(data: dict, chat_ids: list = None):
         caption += f"\n`{summary}`"
         expanded_chat = []
         for chat in chats:
-            expanded_chat.append(chat) if chat else expanded_chat.extend(conf.RSS_CHAT.split())
+            (
+                expanded_chat.append(chat)
+                if chat
+                else expanded_chat.extend(conf.RSS_CHAT.split())
+            )
         for chat in expanded_chat:
             top_chat = chat.split(":")
-            chat, top_id = map(int, top_chat) if len(top_chat) > 1 else (top_chat[0], None)
-            await avoid_flood(bot.client.send_photo, chat, pic, caption, reply_to_message_id=top_id)
+            chat, top_id = (
+                map(int, top_chat) if len(top_chat) > 1 else (top_chat[0], None)
+            )
+            await avoid_flood(
+                bot.client.send_photo, chat, pic, caption, reply_to_message_id=top_id
+            )
     except Exception:
         await logger(Exception)
 

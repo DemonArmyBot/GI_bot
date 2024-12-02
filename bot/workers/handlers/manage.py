@@ -232,7 +232,7 @@ async def rss_editor(event, args, client):
     if not (data := bot.rss_dict.get(args)):
         return await event.reply(f"Could not find rss with title - {args}.")
     if not (
-        or arg.l
+        arg.l
         or arg.exf
         or arg.inf
         or arg.p

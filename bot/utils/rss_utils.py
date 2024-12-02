@@ -74,7 +74,7 @@ async def rss_monitor():
                         break
                 if not parse:
                     continue
-                feed_ = {"link": url, "pic": pic, "summary": summary "title": item_title}
+                feed_ = {"link": url, "pic": pic, "summary": summary, "title": item_title}
                 feed_dict.update(feed_)
                 feed_count += 1
             for feed_ in reversed(feed_dict):

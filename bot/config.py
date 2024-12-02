@@ -56,6 +56,7 @@ class Runtime_Config:
     def __init__(self):
         self.banned = []
         self.client = None
+        self.docker_deployed = False
         self.ignore_pm = False
         self.max_message_length = 4096
         self.offline = False

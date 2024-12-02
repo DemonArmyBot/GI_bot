@@ -9,6 +9,11 @@ from .log_utils import logger
 THREADPOOL = ThreadPoolExecutor(max_workers=1000)
 
 
+def gfn(fn):
+    "gets module path"
+    return ".".join([fn.__module__, fn.__qualname__])
+
+
 async def sync_to_async(func, *args, wait=True, **kwargs):
     try:
         pfunc = partial(func, *args, **kwargs)
@@ -17,6 +22,19 @@ async def sync_to_async(func, *args, wait=True, **kwargs):
         return await future if wait else future
     except Exception:
         logger(Exception)
+
+
+def list_to_str(lst: list, sep=" ", start: int = None, md=True):
+    string = str()
+    t_start = start if isinstance(start, int) else 1
+    for i, count in zip(lst, itertools.count(t_start)):
+        if start is None:
+            string += str(i) + sep
+            continue
+        entry = f"`{i}`"
+        string += f"{count}. {entry} {sep}"
+
+    return string.rstrip(sep)
 
 
 def split_text(text: str, split="\n", pre=False):

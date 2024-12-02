@@ -4,7 +4,7 @@ from bot import asyncio, bot, conf, sys, version_file
 from bot.fun.emojis import enmoji, enmoji2
 from bot.fun.quips import enquip, enquip2
 from bot.utils.log_utils import logger
-
+from bot.utils.rss_utils import scheduler
 
 async def onrestart():
     try:
@@ -42,7 +42,7 @@ async def on_termination():
         dead_msg = f"**I'm {enquip2()} {enmoji2()}**"
         for i in conf.OWNER.split():
             try:
-                await tele.send_message(int(i), dead_msg)
+                await bot.client.send_message(int(i), dead_msg)
             except Exception:
                 pass
     except Exception:
@@ -53,6 +53,7 @@ async def on_termination():
 
 async def on_startup():
     try:
+        scheduler.start()
         loop = asyncio.get_running_loop()
         for signame in {"SIGINT", "SIGTERM", "SIGABRT"}:
             loop.add_signal_handler(

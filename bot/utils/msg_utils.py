@@ -3,9 +3,10 @@ import re
 
 from bot import pyro_errors
 from bot.config import bot, conf
+from bot.fun.quips import enquip3
 from bot.others.exceptions import ArgumentParserError
-
-# from .log_utils import log, logger
+from .bot_utils import gfn
+from .log_utils import log, logger
 
 
 def user_is_allowed(user: str | int):
@@ -27,6 +28,49 @@ def pm_is_allowed(event):
     if event.chat.type.value == "private":
         return not bot.ignore_pm
     return True
+
+
+async def send_rss(data: dict, chat_ids: list = None):
+    try:
+        chats = chat_ids or conf.RSS_CHAT.split()
+        pic = data.get("pic")
+        summary = data.get("summary")
+        title = data.get("title")
+        url = data.get("link")
+        caption = f"**[{title}]({url})**"
+        caption += f"\n`{summary}`"
+        expanded_chat = []
+        for chat in chats:
+            expanded_chat.append(chat) if chat else expanded_chat.extend(conf.RSS_CHAT.split())
+        for chat in expanded_chat:
+            top_chat = chat.split(":")
+            chat, top_id = map(int, top_chat) if len(top_chat) > 1 else (top_chat[0], None)
+            await avoid_flood(bot.client.send_photo, chat, pic, caption, reply_to_message_id=top_id)
+    except Exception:
+        await logger(Exception)
+
+
+async def avoid_flood(func, *args, **kwargs):
+    try:
+        pfunc = partial(func, *args, **kwargs)
+        return await pfunc()
+    except pyro_errors.FloodWait as e:
+        log(
+            e=f"Sleeping for {e.value}s due to floodwait!"
+            "\n"
+            f"Caused by: {gfn(avoid_flood)}"
+        )
+        await asyncio.sleep(e.value)
+        return await avoid_flood(func, *args, **kwargs)
+
+
+async def try_delete(msg):
+    try:
+        await msg.delete()
+    except pyro_errors.exceptions.forbidden_403.MessageDeleteForbidden:
+        await msg.reply(f"`{enquip3()}`", quote=True)
+    except Exception:
+        await logger(Exception)
 
 
 class ThrowingArgumentParser(argparse.ArgumentParser):

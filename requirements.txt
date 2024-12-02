@@ -1,7 +1,9 @@
 aiohttp
+apscheduler
 pymongo
 python-decouple
 pyrogram
+tgcrypto
 git+https://github.com/Nubuki-all/EnkaCard
 git+https://github.com/Nubuki-all/ENCard
 #Snyk pins 

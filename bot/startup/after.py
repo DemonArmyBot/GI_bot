@@ -49,7 +49,8 @@ async def on_termination():
     except Exception:
         pass
     # More cleanup code?
-    exit(0)
+    for task in asyncio.Task.all_tasks():
+        task.cancel()
 
 
 async def on_startup():

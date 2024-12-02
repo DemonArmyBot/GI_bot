@@ -68,7 +68,10 @@ try:
     with bot.client:
         bot.client.loop.run_until_complete(on_startup())
         LOGS.info("Bot has started.")
-        bot.client.loop.run_forever()
+        try:
+            bot.client.loop.run_forever()
+        except asyncio.CancelledError:
+            bot.client.loop.close()
 except Exception:
     LOGS.critical(traceback.format_exc())
     LOGS.critical("Cannot recover from error, exiting…")

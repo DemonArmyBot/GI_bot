@@ -1,3 +1,5 @@
+from functools import partial
+
 import argparse
 import re
 

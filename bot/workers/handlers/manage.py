@@ -1,3 +1,5 @@
+from feedparser import parse as feedparse
+
 from bot.config import bot
 from bot.utils.bot_utils import list_to_str, split_text
 from bot.utils.log_utils import logger
@@ -334,7 +336,7 @@ async def rss_sub(event, args, client):
             | - means and
         *only leech and qbleech commands are passed
         Returns:
-            success message on successfully editing the rss configuration
+            success message on successfully subscribing to an rss feed
     """
     if not user_is_owner(event.from_user.id):
         return

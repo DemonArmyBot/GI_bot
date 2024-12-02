@@ -82,3 +82,6 @@ def read_n_to_last_line(filename, n=1):
             f.seek(0)
         last_line = f.readline().decode()
     return last_line
+
+def file_exists(file):
+    return Path(file).is_file()

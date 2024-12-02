@@ -3,7 +3,7 @@ from .startup.after import on_startup
 from .utils.msg_utils import event_handler
 from .workers.handlers.dev import bash, eval_message, get_logs
 from .workers.handlers.gi import enka_handler
-from .workers.handlers.manage import pause_handler, restart_handler, update_handler
+from .workers.handlers.manage import pause_handler, restart_handler, rss_handler, update_handler
 from .workers.handlers.stuff import getmeme, hello
 
 
@@ -40,6 +40,11 @@ async def _(client, message):
 @bot.client.on_message(filters.incoming & filters.command("meme"))
 async def _(client, message):
     await event_handler(message, getmeme)
+
+
+@bot.client.on_message(filters.incoming & filters.command("rss"))
+async def _(client, message):
+    await event_handler(message, rss_handler, require_args=True)
 
 
 @bot.client.on_message(filters.incoming & filters.command("update"))

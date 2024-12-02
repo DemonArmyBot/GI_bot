@@ -40,6 +40,7 @@ class Config:
                 "RSS_CHAT",
                 default=str(),
             )
+            self.RSS_DELAY = config("RSS_DELAY", default=60, cast=int)
             self.OWNER = config(
                 "OWNER",
                 default=str(),

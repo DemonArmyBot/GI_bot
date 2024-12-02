@@ -1,7 +1,6 @@
-from functools import partial
-
 import argparse
 import re
+from functools import partial
 
 from bot import pyro_errors
 from bot.config import bot, conf

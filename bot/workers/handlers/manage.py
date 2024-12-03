@@ -398,9 +398,9 @@ async def rss_sub(event, args, client):
         msg += f"\n**Chat:-** `{arg.chat or 'Default'}`"
         msg += f"\n**Filters:-**\ninf: `{arg.inf}`\nexf: `{arg.exf}<code/>"
         msg += f"\n**Paused:-** `{arg.p}`"
+        chat = []
         if arg.chat:
             _default = False
-            chat = []
             for chat_ in arg.chat.split():
                 if chat_.casefold() != "default":
                     chat.append(chat_)

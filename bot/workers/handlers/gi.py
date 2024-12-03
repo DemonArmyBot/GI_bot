@@ -169,7 +169,7 @@ async def enka_handler(event, args, client):
             )
             if error:
                 return
-            return await send_multi_cards(event, result, profile)
+            return await send_multi_cards(event, reply, result, profile)
     except Exception:
         await logger(Exception)
     finally:

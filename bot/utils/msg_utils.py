@@ -55,7 +55,11 @@ async def send_rss(data: dict, chat_ids: list = None):
             )
             try:
                 await avoid_flood(
-                    bot.client.send_photo, chat, pic, caption, reply_to_message_id=top_id
+                    bot.client.send_photo,
+                    chat,
+                    pic,
+                    caption,
+                    reply_to_message_id=top_id,
                 )
             except Exception:
                 await logger(Exception)

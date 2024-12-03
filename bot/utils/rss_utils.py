@@ -107,7 +107,11 @@ async def rss_monitor():
 
 
 def get_pic_url(feed):
-    soup = BeautifulSoup(feed["content"][0]["value"], "html.parser")
+    if feed.get("content"):
+        content = feed["content"][0]["value"]  
+    else:
+        return
+    soup = BeautifulSoup(content, "html.parser")
     return soup.find("img")["src"]
 
 

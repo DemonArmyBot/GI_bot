@@ -75,7 +75,7 @@ async def enka_handler(event, args, client):
         dump = arg.d or arg.dump
         prof = arg.p or arg.profile
         akasha = arg.no_top
-        event.reply_to_message
+        reply = event.reply_to_message
         if arg.update:
             await enka_update()
             if not (card or cards or dump or prof):

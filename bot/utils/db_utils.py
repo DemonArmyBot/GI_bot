@@ -32,7 +32,7 @@ async def save2db(db, update, retries=3):
 async def save2db2(data: dict | str = False, db: str = None):
     if not database:
         if data is False or db == "rss":
-            await save2db_lcl2(db)
+            await sync_to_async(save2db_lcl2, db)
         return
     if data is False:
         busers = list_to_str(bot.banned)

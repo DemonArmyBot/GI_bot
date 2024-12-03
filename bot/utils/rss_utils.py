@@ -41,7 +41,7 @@ async def rss_monitor():
             if not bot.rss_ran_once:
                 data["allow_rss_spam"] = True
             feed_count = 0
-            feed_dict = {}
+            feed_list = []
             while True:
                 try:
                     item_title = rss_d.entries[feed_count]["title"]
@@ -59,7 +59,7 @@ async def rss_monitor():
                     )
                     if not data.get("allow_rss_spam"):
                         log(e="Due to spam prevention, RSS feed has been reset.")
-                        feed_dict = {}
+                        feed_list = []
                     break
                 parse = True
                 for flist in data["inf"]:
@@ -80,9 +80,9 @@ async def rss_monitor():
                     "summary": summary,
                     "title": item_title,
                 }
-                feed_dict.update(feed_)
+                feed_list.append(feed_)
                 feed_count += 1
-            for feed_ in reversed(feed_dict):
+            for feed_ in reversed(feed_list):
                 await send_rss(feed_, data["chat"])
                 await asyncio.sleep(1)
             async with rss_dict_lock:

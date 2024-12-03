@@ -1,3 +1,4 @@
+import itertools
 from feedparser import parse as feedparse
 
 from bot import bot, rss_dict_lock
@@ -397,7 +398,7 @@ async def rss_sub(event, args, client):
             last_link = rss_d.entries[0]["link"]
         msg += f"\nLink:- `{last_link}`"
         msg += f"\n**Chat:-** `{arg.chat or 'Default'}`"
-        msg += f"\n**Filters:-**\ninf: `{arg.inf}`\nexf: `{arg.exf}<code/>"
+        msg += f"\n**Filters:-**\ninf: `{arg.inf}`\nexf: `{arg.exf}`"
         msg += f"\n**Paused:-** `{arg.p}`"
         chat = []
         if arg.chat:

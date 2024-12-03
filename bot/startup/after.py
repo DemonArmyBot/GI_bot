@@ -49,8 +49,7 @@ async def on_termination(loop):
     except Exception:
         pass
     # More cleanup code?
-    loop.stop()
-    exit()
+    bot.stop()
 
 
 async def on_startup():

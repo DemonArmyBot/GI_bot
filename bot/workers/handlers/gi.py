@@ -9,7 +9,13 @@ from bot.utils.gi_utils import (
     get_gi_info,
 )
 from bot.utils.log_utils import logger
-from bot.utils.msg_utils import clean_reply, get_args, pm_is_allowed, user_is_allowed, user_is_owner
+from bot.utils.msg_utils import (
+    clean_reply,
+    get_args,
+    pm_is_allowed,
+    user_is_allowed,
+    user_is_owner,
+)
 from bot.utils.os_utils import s_remove
 
 
@@ -69,7 +75,7 @@ async def enka_handler(event, args, client):
         dump = arg.d or arg.dump
         prof = arg.p or arg.profile
         akasha = arg.no_top
-        replied = event.reply_to_message
+        event.reply_to_message
         if arg.update:
             await enka_update()
             if not (card or cards or dump or prof):
@@ -93,7 +99,9 @@ async def enka_handler(event, args, client):
             file_name = caption + ".png"
             path = "enka/" + file_name
             cprofile.card.save(path)
-            await clean_reply(event, reply, "reply_photo", photo=path, caption=f"**{caption}**")
+            await clean_reply(
+                event, reply, "reply_photo", photo=path, caption=f"**{caption}**"
+            )
             return s_remove(path)
         if card:
             info = await get_gi_info(query=card)
@@ -118,7 +126,9 @@ async def enka_handler(event, args, client):
                 error = f"**{card} not found in showcase!**"
                 return
             result.card[0].card.save(path)
-            await clean_reply(event, reply, "reply_photo", photo=path, caption=f"**{caption}**")
+            await clean_reply(
+                event, reply, "reply_photo", photo=path, caption=f"**{caption}**"
+            )
             return s_remove(path)
         if cards:
             ids = str()
@@ -175,7 +185,9 @@ async def send_multi_cards(event, reply, results, profile):
         path = "enka/" + file_name
         card.card.save(path)
         chain = event
-        chain = await clean_reply(chain, reply, "reply_photo", photo=path, caption=f"**{caption}**")
+        chain = await clean_reply(
+            chain, reply, "reply_photo", photo=path, caption=f"**{caption}**"
+        )
         reply = None
         await asyncio.sleep(3)
         s_remove(path)

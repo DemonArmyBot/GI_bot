@@ -1,3 +1,4 @@
+import asyncio
 import itertools
 
 from feedparser import parse as feedparse

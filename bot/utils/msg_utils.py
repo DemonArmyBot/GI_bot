@@ -51,11 +51,14 @@ async def send_rss(data: dict, chat_ids: list = None):
         for chat in expanded_chat:
             top_chat = chat.split(":")
             chat, top_id = (
-                map(int, top_chat) if len(top_chat) > 1 else (top_chat[0], None)
+                map(int, top_chat) if len(top_chat) > 1 else (int(top_chat[0]), None)
             )
-            await avoid_flood(
-                bot.client.send_photo, chat, pic, caption, reply_to_message_id=top_id
-            )
+            try:
+                await avoid_flood(
+                    bot.client.send_photo, chat, pic, caption, reply_to_message_id=top_id
+                )
+            except Exception:
+                await logger(Exception)
     except Exception:
         await logger(Exception)
 

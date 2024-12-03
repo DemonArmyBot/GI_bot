@@ -78,9 +78,11 @@ async def enka_handler(event, args, client):
         akasha = arg.no_top
         reply = event.reply_to_message
         if arg.update:
+            u_reply = await event.reply("`Updating enka assets…`")
             await enka_update()
             if not (card or cards or dump or prof):
-                return await event.reply("Updated enka assets.")
+                return await u_reply.edit("Updated enka assets.")
+            await u_reply.delete()
         if not (card or cards or dump or prof):
             return await event.reply(f"```{enka_handler.__doc__}```")
         if arg.t not in ("1", "2"):

@@ -182,13 +182,13 @@ async def enka_handler(event, args, client):
 
 
 async def send_multi_cards(event, reply, results, profile):
+    chain = event
     for card in results.card:
         print(card.name)  # best debugger?
         caption = f"{profile.player.name}'s current {card.name} build"
         file_name = caption + ".png"
         path = "enka/" + file_name
         card.card.save(path)
-        chain = event
         chain = await clean_reply(
             chain, reply, "reply_photo", photo=path, caption=f"**{caption}**"
         )

@@ -49,7 +49,8 @@ async def on_termination(loop):
     except Exception:
         pass
     # More cleanup code?
-    loop.close()
+    loop.stop()
+    exit()
 
 
 async def on_startup():

@@ -1,5 +1,6 @@
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
+import itertools
 from functools import partial
 
 import aiohttp

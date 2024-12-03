@@ -4,10 +4,11 @@ beautifulsoup4
 feedparser
 pymongo
 python-decouple
-pyrogram
+#pyrogram
 tgcrypto
 git+https://github.com/Nubuki-all/EnkaCard
 git+https://github.com/Nubuki-all/ENCard
+https://github.com/KurimuzonAkuma/pyrogram/archive/dev.zip
 #Snyk pins 
 certifi>=2023.7.22 # not directly required, pinned by Snyk to avoid a vulnerability
 dnspython>=2.6.0rc1 # not directly required, pinned by Snyk to avoid a vulnerability

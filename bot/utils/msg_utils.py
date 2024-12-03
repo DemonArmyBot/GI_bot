@@ -39,7 +39,7 @@ async def send_rss(data: dict, chat_ids: list = None):
         summary = data.get("summary")
         title = data.get("title")
         url = data.get("link")
-        caption = f"**[{title}]({url})**"
+        caption = f"**--[{title}]({url})--**"
         caption += f"\n`{summary}`"
         expanded_chat = []
         for chat in chats:

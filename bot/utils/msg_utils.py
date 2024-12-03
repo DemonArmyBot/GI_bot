@@ -70,7 +70,10 @@ async def send_rss(data: dict, chat_ids: list = None):
 async def clean_reply(event, reply, func, *args, **kwargs):
     if reply:
         clas = reply
-        await event.delete()
+        try:
+            await event.delete()
+        except Exception:
+            await logger(Exception)
     else:
         clas = event
     func = getattr(clas, func)

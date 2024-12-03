@@ -46,6 +46,7 @@ async def enka_handler(event, args, client):
         - retrieves the current build for whatever matches the character name provided; in this case Xingqui
     """
     error = None
+    status = None
     user = event.from_user.id
     if not user_is_owner(user):
         if not pm_is_allowed(event):
@@ -87,6 +88,7 @@ async def enka_handler(event, args, client):
         profile, error = await get_enka_profile(args)
         if error:
             return
+        status = await event.reply("`Fetching card(s), Please Wait…`")
         if prof:
             cprofile, error = (
                 await get_enka_profile(args, card=True, template=arg.t)
@@ -173,6 +175,8 @@ async def enka_handler(event, args, client):
     except Exception:
         await logger(Exception)
     finally:
+        if status:
+            return await status.delete()
         if error:
             return await event.reply(f"**Error:**\n{result}")
 

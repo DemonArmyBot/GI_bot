@@ -9,7 +9,7 @@ from bot.utils.gi_utils import (
     get_gi_info,
 )
 from bot.utils.log_utils import logger
-from bot.utils.msg_utils import get_args, pm_is_allowed, user_is_allowed, user_is_owner
+from bot.utils.msg_utils import clean_reply, get_args, pm_is_allowed, user_is_allowed, user_is_owner
 from bot.utils.os_utils import s_remove
 
 
@@ -69,6 +69,7 @@ async def enka_handler(event, args, client):
         dump = arg.d or arg.dump
         prof = arg.p or arg.profile
         akasha = arg.no_top
+        replied = event.reply_to_message
         if arg.update:
             await enka_update()
             if not (card or cards or dump or prof):
@@ -92,7 +93,7 @@ async def enka_handler(event, args, client):
             file_name = caption + ".png"
             path = "enka/" + file_name
             cprofile.card.save(path)
-            await event.reply_photo(photo=path, caption=f"**{caption}**")
+            await clean_reply(event, reply, "reply_photo", photo=path, caption=f"**{caption}**")
             return s_remove(path)
         if card:
             info = await get_gi_info(query=card)
@@ -117,7 +118,7 @@ async def enka_handler(event, args, client):
                 error = f"**{card} not found in showcase!**"
                 return
             result.card[0].card.save(path)
-            await event.reply_photo(photo=path, caption=f"**{caption}**")
+            await clean_reply(event, reply, "reply_photo", photo=path, caption=f"**{caption}**")
             return s_remove(path)
         if cards:
             ids = str()
@@ -147,7 +148,7 @@ async def enka_handler(event, args, client):
 
             if errors:
                 await event.reply(error_txt)
-            return await send_multi_cards(event, result, profile)
+            return await send_multi_cards(event, reply, result, profile)
         if dump:
             result, error = (
                 await get_enka_card(
@@ -166,14 +167,16 @@ async def enka_handler(event, args, client):
             return await event.reply(f"**Error:**\n{result}")
 
 
-async def send_multi_cards(event, results, profile):
+async def send_multi_cards(event, reply, results, profile):
     for card in results.card:
         print(card.name)  # best debugger?
         caption = f"{profile.player.name}'s current {card.name} build"
         file_name = caption + ".png"
         path = "enka/" + file_name
         card.card.save(path)
-        await event.reply_photo(photo=path, caption=f"*{caption}*")
+        chain = event
+        chain = await clean_reply(chain, reply, "reply_photo", photo=path, caption=f"**{caption}**")
+        reply = None
         await asyncio.sleep(3)
         s_remove(path)
 

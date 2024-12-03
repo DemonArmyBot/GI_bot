@@ -198,7 +198,6 @@ async def rss_get(event, args, client):
         await avoid_flood(
             imsg.edit,
             f"Here are the last **{count}** item(s) from {title}:",
-            quote=True,
         )
     except IndexError:
         await avoid_flood(

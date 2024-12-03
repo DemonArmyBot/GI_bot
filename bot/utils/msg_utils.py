@@ -67,6 +67,16 @@ async def send_rss(data: dict, chat_ids: list = None):
         await logger(Exception)
 
 
+async def clean_reply(event, reply, func, *args, **kwargs):
+    if reply:
+        clas = reply
+        await event.delete()
+    else:
+        clas = event
+    func = getattr(clas, func)
+    return await avoid_flood(func, *args, **kwargs)
+
+
 async def avoid_flood(func, *args, **kwargs):
     try:
         pfunc = partial(func, *args, **kwargs)

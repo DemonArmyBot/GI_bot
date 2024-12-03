@@ -1,6 +1,6 @@
 from feedparser import parse as feedparse
 
-from bot.config import bot
+from bot import bot, rss_dict_lock
 from bot.utils.bot_utils import list_to_str, split_text
 from bot.utils.log_utils import logger
 from bot.utils.msg_utils import (

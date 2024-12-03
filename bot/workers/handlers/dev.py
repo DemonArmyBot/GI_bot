@@ -75,11 +75,9 @@ async def bash(event, cmd, client):
     if len(OUTPUT) > 4000:
         with io.BytesIO(str.encode(OUTPUT)) as out_file:
             out_file.name = "exec.text"
-            await event.client.send_file(
-                event.chat_id,
-                out_file,
-                force_document=True,
-                allow_cache=False,
+            await event.reply_document(
+                document=out_file,
+                quote=True,
                 caption=cmd,
             )
             return await event.delete()

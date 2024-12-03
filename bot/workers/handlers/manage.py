@@ -130,7 +130,7 @@ async def rss_list(event, args, client):
         return ", ".join(["(" + ", ".join(map(str, sublist)) + ")" for sublist in ftr])
 
     async with rss_dict_lock:
-        for i, (title, data) in zip(itertools.count(1), list(_bot.rss_dict.items())):
+        for i, (title, data) in zip(itertools.count(1), list(bot.rss_dict.items())):
             list_feed += (
                 f"\n\n{i}. **Title:** `{title}`\n**Feed Url: **`{data['link']}`\n"
             )
@@ -170,7 +170,7 @@ async def rss_get(event, args, client):
 
     title = args
     count = int(arg.a)
-    data = _bot.rss_dict.get(title)
+    data = bot.rss_dict.get(title)
     if not (data and count > 0):
         return await event.reply(f"`{rss_get.__doc__}`")
     try:
@@ -410,7 +410,7 @@ async def rss_sub(event, args, client):
                     chat.append(None)
                     _default = True
         async with rss_dict_lock:
-            _bot.rss_dict[title] = {
+            bot.rss_dict[title] = {
                 "link": feed_link,
                 "last_feed": last_link,
                 "last_title": last_title,
@@ -435,7 +435,7 @@ async def rss_sub(event, args, client):
     except Exception as e:
         await logger(Exception)
         return await avoid_flood(event.reply, str(e))
-    await save2db2(_bot.rss_dict, "rss")
+    await save2db2(bot.rss_dict, "rss")
     if msg:
         await avoid_flood(event.reply, msg, quote=True)
     if arg.p:

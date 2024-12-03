@@ -89,6 +89,7 @@ async def enka_handler(event, args, client):
             arg.t = 1
         profile, error = await get_enka_profile(args)
         if error:
+            result = profile
             return
         status = await event.reply("`Fetching card(s), Please Wait…`")
         if prof:

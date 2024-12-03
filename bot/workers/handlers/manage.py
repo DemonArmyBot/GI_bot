@@ -2,6 +2,7 @@ from feedparser import parse as feedparse
 
 from bot import bot, rss_dict_lock
 from bot.utils.bot_utils import list_to_str, split_text
+from bot.utils.db_utils import save2db2
 from bot.utils.log_utils import logger
 from bot.utils.msg_utils import (
     avoid_flood,

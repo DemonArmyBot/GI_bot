@@ -1,4 +1,5 @@
 import itertools
+
 from feedparser import parse as feedparse
 
 from bot import bot, rss_dict_lock

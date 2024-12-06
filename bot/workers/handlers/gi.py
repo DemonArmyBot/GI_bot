@@ -1,9 +1,10 @@
 import asyncio
-from bs4 import BeautifulSoup
-import itertools
 import html
-import requests
 import io
+import itertools
+
+import requests
+from bs4 import BeautifulSoup
 from PIL import Image
 
 from bot.utils.bot_utils import split_text
@@ -223,9 +224,7 @@ async def weapon_handler(event, args, client):
             )
         weapon_stats = await get_gi_info("weapons", args, stats=True)
         pic, caption = fetch_weapon_detail(weapon, weapon_stats)
-        await clean_reply(
-            event, reply, "reply_photo", photo=pic, caption=caption
-        )
+        await clean_reply(event, reply, "reply_photo", photo=pic, caption=caption)
     except Exception:
         await logger(Exception)
 
@@ -249,7 +248,10 @@ def fetch_weapon_detail(weapon: dict, weapon_stats: dict) -> tuple:
         r3 = weapon["r3"]["values"] if weapon.get("r3") else []
         r4 = weapon["r4"]["values"] if weapon.get("r4") else []
         r5 = weapon["r5"]["values"] if weapon.get("r5") else []
-        key = [f'**{"{a}/{b}/{c}/{d}/{e}".split("/None", maxsplit=1)[0]}**' for a, b, c, d, e in itertools.zip_longest(r1, r2, r3, r4, r5)]
+        key = [
+            f'**{"{a}/{b}/{c}/{d}/{e}".split("/None", maxsplit=1)[0]}**'
+            for a, b, c, d, e in itertools.zip_longest(r1, r2, r3, r4, r5)
+        ]
         effects = effects.format(*key)
     img_suf = weapon["images"]["filename_gacha"]
     img = add_background(img_suf, rarity, name)
@@ -277,15 +279,21 @@ def fetch_weapon_detail(weapon: dict, weapon_stats: dict) -> tuple:
     return img, caption
 
 
-def add_background(image_suf: str, rarity: int, name: str="weapon"):
+def add_background(image_suf: str, rarity: int, name: str = "weapon"):
     """Fetches image and adds a background.
 
     Args:
         image_suf: identifier for image.
         rarity: rarity of item
     """
-    # Dict for associating rarity with background color 
-    color = {1: (126, 126, 128, 255), 2: (78, 126, 110, 255), 3: (84, 134, 169, 255), 4: (127, 103, 161, 255), 5: (176, 112, 48, 255)}
+    # Dict for associating rarity with background color
+    color = {
+        1: (126, 126, 128, 255),
+        2: (78, 126, 110, 255),
+        3: (84, 134, 169, 255),
+        4: (127, 103, 161, 255),
+        5: (176, 112, 48, 255),
+    }
 
     # Download the image
     image_url = f"https://gi.yatta.moe/assets/UI/{image_suf}.png"
@@ -295,14 +303,15 @@ def add_background(image_suf: str, rarity: int, name: str="weapon"):
     # Create an Image object from the downloaded content
     img = Image.open(response.raw)
 
-    # Create a gold/purple/blue/green/white background image with the same size as the input image
-    background = Image.new('RGBA', img.size, color.get(rarity))  # color with alpha
+    # Create a gold/purple/blue/green/white background image with the same
+    # size as the input image
+    background = Image.new("RGBA", img.size, color.get(rarity))  # color with alpha
 
     # Paste the input image onto the background
     background.paste(img, (0, 0), img)
 
     # Save the output image
     output = io.BytesIO()
-    background.save(output,  format="png")
+    background.save(output, format="png")
     output.name = f"{name}.png"
     return output

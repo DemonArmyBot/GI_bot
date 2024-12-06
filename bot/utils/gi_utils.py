@@ -5,7 +5,10 @@ from enkacard import enc_error, encbanner
 from .log_utils import logger
 
 uri = "https://genshin-db-api.vercel.app/api/v5/{}?query={}&dumpResult=true"
-uri2 = "https://genshin-db-api.vercel.app/api/v5/stats?folder={}&query={}&dumpResult=true"
+uri2 = (
+    "https://genshin-db-api.vercel.app/api/v5/stats?folder={}&query={}&dumpResult=true"
+)
+
 
 async def get_gi_info(folder="characters", query="chiori", direct=False, stats=False):
     url = uri.format(folder, query) if not stats else uri2.format(folder, query)

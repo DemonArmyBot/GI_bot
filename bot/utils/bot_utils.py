@@ -1,12 +1,12 @@
 import asyncio
 import itertools
-import requests
 from concurrent.futures import ThreadPoolExecutor
 from functools import partial
 
 import aiohttp
+import requests
 
-from bot import LOGS, bot, time, telegraph_errors
+from bot import LOGS, bot, telegraph_errors, time
 
 THREADPOOL = ThreadPoolExecutor(max_workers=1000)
 

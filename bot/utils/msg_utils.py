@@ -1,7 +1,8 @@
 import argparse
-from bs4 import BeautifulSoup
 import re
 from functools import partial
+
+from bs4 import BeautifulSoup
 from pyrogram.types import InputMediaPhoto
 
 from bot import pyro_errors
@@ -55,7 +56,7 @@ async def parse_and_send_rss(data: dict, chat_ids: list = None):
     try:
         chats = chat_ids or conf.RSS_CHAT.split()
         pic = data.get("pic")
-        summary =  sanitize_text(data.get("summary"))
+        summary = sanitize_text(data.get("summary"))
         tgh_link = str()
         title = data.get("title")
         url = data.get("link")

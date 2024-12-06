@@ -70,7 +70,7 @@ async def parse_and_send_rss(data: dict, chat_ids: list = None):
             tgh_link = (await post_to_tgph("Genshin_impact", content))["url"]
             caption += f"\n>**['Telegraph']({tgh_link})**"
         media = build_media(caption, pic)
-        expanded_chat ="" []
+        expanded_chat = []
         for chat in chats:
             (
                 expanded_chat.append(chat)

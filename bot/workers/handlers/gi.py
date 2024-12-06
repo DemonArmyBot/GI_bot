@@ -276,7 +276,7 @@ def fetch_weapon_detail(weapon: dict, weapon_stats: dict) -> tuple:
     if main_stat:
         caption += f"**{main_stat}:** `{base_stat}` ➜ `{max_main_stat}` __(Lvl {max_level})__\n"
     story = split_text(story, list_size=2000)
-    caption += f"`{(story[:2000] + "…") if len(story) > 2000 else story}`\n\n"
+    caption += f"`{(story[:2000] + '…') if len(story) > 2000 else story}`\n\n"
     if effects:
         caption += f"**{effect_name}** +\n"
         caption += f"```{effects}```"

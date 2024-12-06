@@ -14,7 +14,7 @@ from bot.utils.gi_utils import (
     get_enka_profile2,
     get_gi_info,
 )
-from bot.utils.log_utils import logger
+from bot.utils.log_utils import log, logger
 from bot.utils.msg_utils import (
     clean_reply,
     get_args,
@@ -250,10 +250,7 @@ def fetch_weapon_detail(weapon: dict, weapon_stats: dict) -> tuple:
         r3 = weapon["r3"]["values"] if weapon.get("r3") else []
         r4 = weapon["r4"]["values"] if weapon.get("r4") else []
         r5 = weapon["r5"]["values"] if weapon.get("r5") else []
-        key = [
-            f'**{"{a}/{b}/{c}/{d}/{e}".split("/None", maxsplit=1)[0]}**'
-            for a, b, c, d, e in itertools.zip_longest(r1, r2, r3, r4, r5)
-        ]
+        key = [f"{a}/{b}/{c}/{d}/{e}".split("/None", maxsplit=1)[0] for a, b, c, d, e in itertools.zip_longest(r1, r2, r3, r4, r5)]
         effects = effects.format(*key)
     img_suf = weapon["images"]["filename_gacha"]
     img = add_background(img_suf, rarity, name)
@@ -274,6 +271,7 @@ def fetch_weapon_detail(weapon: dict, weapon_stats: dict) -> tuple:
         caption += f"**{main_stat}:** `{base_stat}` ➜ `{max_main_stat}` __(Lvl {max_level})__\n"
     caption += f"`{(des[:2000] + '…') if len(des) > 2000 else des}`\n\n"
     if effects:
+        log(e=effects)
         caption += f"**{effect_name}** +\n"
         caption += f"```{effects}```"
 

@@ -49,7 +49,7 @@ def sanitize_text(text: str) -> str:
     if not text:
         return text
     text = BeautifulSoup(text, "html.parser").text
-    return (text[:3500] + "…") if len(text) > 3500 else text
+    return (text[:900] + "…") if len(text) > 900 else text
 
 
 async def parse_and_send_rss(data: dict, chat_ids: list = None):
@@ -70,7 +70,7 @@ async def parse_and_send_rss(data: dict, chat_ids: list = None):
                     + "<strong>...<strong><br><br><strong>(TRUNCATED DUE TO CONTENT EXCEEDING MAX LENGTH)<strong>"
                 )
             tgh_link = (await post_to_tgph("Genshin_impact", content))["url"]
-            caption += f"\n>**['Telegraph']({tgh_link})**"
+            caption += f"\n\n>**[Telegraph]({tgh_link})**"
         media = build_media(caption, pic)
         expanded_chat = []
         for chat in chats:

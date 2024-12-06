@@ -209,6 +209,11 @@ async def send_multi_cards(event, reply, results, profile):
 
 
 async def weapon_handler(event, args, client):
+    """
+    Fetch specified genshin weapon details;
+    Args:
+        Name of weapon.
+    """
     user = event.from_user.id
     if not user_is_owner(user):
         if not pm_is_allowed(event):
@@ -220,7 +225,7 @@ async def weapon_handler(event, args, client):
         weapon = await get_gi_info("weapons", args)
         if not weapon:
             return await event.reply(
-                f"**Weapon not found.**\nYou searched for {args}.\nNot what you searched for?\nTry again with double quotes"
+                f"**Weapon not found.**\nYou searched for `{args}`."
             )
         weapon_stats = await get_gi_info("weapons", args, stats=True)
         pic, caption = fetch_weapon_detail(weapon, weapon_stats)

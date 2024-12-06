@@ -1,5 +1,4 @@
 import asyncio
-import html
 import io
 import itertools
 
@@ -236,7 +235,7 @@ async def weapon_handler(event, args, client):
 
 def fetch_weapon_detail(weapon: dict, weapon_stats: dict) -> tuple:
     name = weapon.get("name")
-    des = weapon.get("description")
+    weapon.get("description")
     rarity = weapon.get("rarity")
     max_level = "90" if rarity > 2 else "70"
     typ = weapon.get("weaponText")

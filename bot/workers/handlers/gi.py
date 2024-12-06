@@ -224,7 +224,7 @@ async def weapon_handler(event, args, client):
         weapon_stats = await get_gi_info("weapons", args, stats=True)
         pic, caption = fetch_weapon_detail(weapon, weapon_stats)
         await clean_reply(
-            event, reply, "reply_photo", photo=pic, caption=caption"
+            event, reply, "reply_photo", photo=pic, caption=caption
         )
     except Exception:
         await logger(Exception)

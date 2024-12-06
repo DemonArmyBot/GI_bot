@@ -6,7 +6,6 @@ import requests
 from bs4 import BeautifulSoup
 from PIL import Image
 
-from bot.utils.bot_utils import split_text
 from bot.utils.gi_utils import (
     enka_update,
     get_enka_card,

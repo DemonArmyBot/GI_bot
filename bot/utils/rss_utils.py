@@ -9,7 +9,7 @@ from bot.workers.auto.schedule import addjob, scheduler
 
 from .db_utils import save2db2
 from .log_utils import log
-from .msg_utils import send_rss
+from .msg_utils import parse_and_send_rss
 
 
 async def rss_monitor():
@@ -46,6 +46,8 @@ async def rss_monitor():
                 try:
                     item_title = rss_d.entries[feed_count]["title"]
                     pic = get_pic_url(rss_d.entries[feed_count])
+                    if content := rss_d.entries[feed_count].get("content"):
+                        content = content[0]["value"]
                     summary = rss_d.entries[feed_count]["summary"]
                     try:
                         url = rss_d.entries[feed_count]["links"][1]["href"]
@@ -77,13 +79,14 @@ async def rss_monitor():
                 feed_ = {
                     "link": url,
                     "pic": pic,
+                    "content": content,
                     "summary": summary,
                     "title": item_title,
                 }
                 feed_list.append(feed_)
                 feed_count += 1
             for feed_ in reversed(feed_list):
-                await send_rss(feed_, data["chat"])
+                await parse_and_send_rss(feed_, data["chat"])
                 await asyncio.sleep(1)
             async with rss_dict_lock:
                 bot.rss_dict[title].update(
@@ -106,13 +109,19 @@ async def rss_monitor():
         bot.rss_ran_once = True
 
 
-def get_pic_url(feed):
+def get_pic_url(feed: dict) -> list | None:
     if feed.get("content"):
         content = feed["content"][0]["value"]
     else:
         return
-    soup = BeautifulSoup(content, "html.parser")
-    return soup.find("img")["src"]
+    pics = []
+    soups = BeautifulSoup(content, "html.parser")
+    for soup in soups.find_all("img"):
+        pic = soup["src"]
+        if pic:
+            pic = pic.split("?x-oss")[0]
+            pics.append(pic)
+    return pics
 
 
 def schedule_rss():

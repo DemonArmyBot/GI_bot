@@ -1,5 +1,12 @@
 import asyncio
+from bs4 import BeautifulSoup
+import itertools
+import html
+import requests
+import io
+from PIL import Image
 
+from bot.utils.bot_utils import split_text
 from bot.utils.gi_utils import (
     enka_update,
     get_enka_card,
@@ -200,4 +207,102 @@ async def send_multi_cards(event, reply, results, profile):
         s_remove(path)
 
 
-# async def weapon_handler(event, args, client):
+async def weapon_handler(event, args, client):
+    user = event.from_user.id
+    if not user_is_owner(user):
+        if not pm_is_allowed(event):
+            return
+        if not user_is_allowed(user):
+            return
+    try:
+        reply = event.reply_to_message
+        weapon = await get_gi_info("weapons", args)
+        if not weapon:
+            return await event.reply(
+                f"**Weapon not found.**\nYou searched for {args}.\nNot what you searched for?\nTry again with double quotes"
+            )
+        weapon_stats = await get_gi_info("weapons", args, stats=True)
+        pic, caption = fetch_weapon_detail(weapon, weapon_stats)
+        await clean_reply(
+            event, reply, "reply_photo", photo=pic, caption=caption}"
+        )
+    except Exception:
+        await logger(Exception)
+
+
+def fetch_weapon_detail(weapon: dict, weapon_stats: dict) -> tuple:
+    name = weapon.get("name")
+    des = weapon.get("description")
+    rarity = weapon.get("rarity")
+    max_level = "90" if rarity > 2 else "70"
+    typ = weapon.get("weaponText")
+    base_atk = round(weapon.get("baseAtkValue"))
+    main_stat = weapon.get("mainStatText", str())
+    base_stat = weapon.get("baseStatText", str())
+    effect_name = weapon.get("effectName", str())
+    effects = weapon.get("effectTemplateRaw", str())
+    story = weapon.get("story")
+    if effects:
+        effects = BeautifulSoup(effects, "html.parser").text
+        r1 = weapon["r1"]["values"] if weapon.get("r1") else []
+        r2 = weapon["r2"]["values"] if weapon.get("r2") else []
+        r3 = weapon["r3"]["values"] if weapon.get("r3") else []
+        r4 = weapon["r4"]["values"] if weapon.get("r4") else []
+        r5 = weapon["r5"]["values"] if weapon.get("r5") else []
+        key = [f'**{"{a}/{b}/{c}/{d}/{e}".split("/None", maxsplit=1)[0]}**' for a, b, c, d, e in itertools.zip_longest(r1, r2, r3, r4, r5)]
+        effects = effects.format(*key)
+    img_suf = weapon["images"]["filename_gacha"]
+    img = add_background(img_suf, rarity, name)
+    max_stats = weapon_stats["stats"][max_level]
+    max_base_atk = round(max_stats.get("attack"))
+    max_main_stat = max_stats.get("specialized")
+    if main_stat:
+        if max_main_stat > 1:
+            max_main_stat = round(max_main_stat)
+        else:
+            max_main_stat = f"{(round(max_main_stat) * 100)}%"
+    caption = f"**{name}**\n"
+    caption += f"{'⭐' * rarity}\n\n"
+    caption += f"**Rarity:** `{'★' * rarity}`\n"
+    caption += f"**Type:** `{typ}`\n"
+    caption += f"**Base ATK:** `{base_atk}` ➜ `{max_base_atk}` __(Lvl {max_level})__\n"
+    if main_stat:
+        caption += f"**{main_stat}:** `{base_stat}` ➜ `{max_main_stat}` __(Lvl {max_level})__\n"
+    story = split_text(story, list_size=2000)
+    caption += f"`{(story[:2000] + "…") if len(story) > 2000 else story}`\n\n"
+    if effects:
+        caption += f"**{effect_name}** +\n"
+        caption += f"```{effects}```"
+
+    return img, caption
+
+
+def add_background(image_suf: str, rarity: int, name: str="weapon"):
+    """Fetches image and adds a background.
+
+    Args:
+        image_suf: identifier for image.
+        rarity: rarity of item
+    """
+    # Dict for associating rarity with background color 
+    color = {1: (126, 126, 128, 255), 2: (78, 126, 110, 255), 3: (84, 134, 169, 255), 4: (127, 103, 161, 255), 5: (176, 112, 48, 255)}
+
+    # Download the image
+    image_url = f"https://gi.yatta.moe/assets/UI/{image_suf}.png"
+    response = requests.get(image_url, stream=True)
+    response.raise_for_status()
+
+    # Create an Image object from the downloaded content
+    img = Image.open(response.raw)
+
+    # Create a gold/purple/blue/green/white background image with the same size as the input image
+    background = Image.new('RGBA', img.size, color.get(rarity))  # color with alpha
+
+    # Paste the input image onto the background
+    background.paste(img, (0, 0), img)
+
+    # Save the output image
+    output = io.BytesIO()
+    background.save(output,  format="png")
+    output.name = f"{name}.png"
+    return output

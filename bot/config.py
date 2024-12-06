@@ -45,6 +45,9 @@ class Config:
                 "OWNER",
                 default=str(),
             )
+            self.TELEGRAPH_API = config(
+                "TELEGRAPH_API", default="https://api.telegra.ph"
+            )
             self.WORKERS = config("WORKERS", default=5, cast=int)
         except Exception:
             print("Environment vars Missing; or")

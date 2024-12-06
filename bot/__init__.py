@@ -13,6 +13,8 @@ from logging.handlers import RotatingFileHandler
 from pathlib import Path
 from urllib.parse import urlparse
 
+from html_telegraph_poster import TelegraphPoster
+from html_telegraph_poster import errors as telegraph_errors
 from pyrogram import Client
 from pyrogram import errors as pyro_errors
 from pyrogram import filters
@@ -71,6 +73,7 @@ if sys.version_info < (3, 10):
 LOGS.info("Starting...")
 
 bot.ignore_pm = conf.IGNORE_PM
+bot.tgp_client = TelegraphPoster(use_api=True, telegraph_api_url=conf.TELEGRAPH_API)
 
 try:
     bot.client = Client(

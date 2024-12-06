@@ -3,6 +3,7 @@ import pickle
 from pymongo import MongoClient
 
 from bot import LOGS, bot, conf, os, sys, version_file
+from bot.utils.bot_utils import create_api_token
 from bot.utils.local_db_utils import load_local_db
 from bot.utils.os_utils import file_exists
 
@@ -65,3 +66,5 @@ else:
     rssdb = userdb = None
 
     load_local_db()
+
+create_api_token()

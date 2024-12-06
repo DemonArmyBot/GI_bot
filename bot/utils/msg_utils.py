@@ -1,13 +1,15 @@
 import argparse
+from bs4 import BeautifulSoup
 import re
 from functools import partial
+from pyrogram.types import InputMediaPhoto
 
 from bot import pyro_errors
 from bot.config import bot, conf
 from bot.fun.quips import enquip3
 from bot.others.exceptions import ArgumentParserError
 
-from .bot_utils import gfn
+from .bot_utils import gfn, post_to_tgph
 from .log_utils import log, logger
 
 
@@ -32,16 +34,43 @@ def pm_is_allowed(event):
     return True
 
 
-async def send_rss(data: dict, chat_ids: list = None):
+def build_media(caption, pics):
+    if len(pics) < 2:
+        return None
+    media = []
+    for pic in pics:
+        media.append(InputMediaPhoto(pic, caption=caption))
+        caption = None
+    return media
+
+
+def sanitize_text(text: str) -> str:
+    if not text:
+        return text
+    text = BeautifulSoup(text, "html.parser").text
+    return (text[:3500] + "…") if len(text) > 3500 else text
+
+
+async def parse_and_send_rss(data: dict, chat_ids: list = None):
     try:
         chats = chat_ids or conf.RSS_CHAT.split()
         pic = data.get("pic")
-        summary = data.get("summary")
+        summary =  sanitize_text(data.get("summary"))
+        tgh_link = str()
         title = data.get("title")
         url = data.get("link")
         caption = f">**[{title}]({url})**"
-        caption += f"\n`{summary}`"
-        expanded_chat = []
+        caption += f"\n`{summary or str()}`"
+        if content:
+            if len(content) > 65536:
+                content = (
+                    content[:65430]
+                    + "<strong>...<strong><br><br><strong>(TRUNCATED DUE TO CONTENT EXCEEDING MAX LENGTH)<strong>"
+                )
+            tgh_link = (await post_to_tgph("Genshin_impact", content))["url"]
+            caption += f"\n>**['Telegraph']({tgh_link})**"
+        media = build_media(caption, pic)
+        expanded_chat ="" []
         for chat in chats:
             (
                 expanded_chat.append(chat)
@@ -53,25 +82,35 @@ async def send_rss(data: dict, chat_ids: list = None):
             chat, top_id = (
                 map(int, top_chat) if len(top_chat) > 1 else (int(top_chat[0]), None)
             )
-            try:
-                (
-                    await avoid_flood(
-                        bot.client.send_photo,
-                        chat,
-                        pic,
-                        caption,
-                        reply_to_message_id=top_id,
-                    )
-                    if pic
-                    else await avoid_flood(
-                        bot.client.send_message,
-                        chat,
-                        caption,
-                        reply_to_message_id=top_id,
-                    )
-                )
-            except Exception:
-                await logger(Exception)
+            await send_rss(caption, chat, media, pic, top_id)
+    except Exception:
+        await logger(Exception)
+
+
+async def send_rss(caption, chat, media, pic, top_id):
+    try:
+        if media:
+            await avoid_flood(
+                bot.client.send_media_group,
+                chat,
+                media,
+                reply_to_message_id=top_id,
+            )
+        elif pic:
+            await avoid_flood(
+                bot.client.send_photo,
+                chat,
+                pic,
+                caption,
+                reply_to_message_id=top_id,
+            )
+        else:
+            await avoid_flood(
+                bot.client.send_message,
+                chat,
+                caption,
+                reply_to_message_id=top_id,
+            )
     except Exception:
         await logger(Exception)
 

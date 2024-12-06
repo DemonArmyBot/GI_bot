@@ -235,7 +235,7 @@ async def weapon_handler(event, args, client):
 
 def fetch_weapon_detail(weapon: dict, weapon_stats: dict) -> tuple:
     name = weapon.get("name")
-    weapon.get("description")
+    des = weapon.get("description")
     rarity = weapon.get("rarity")
     max_level = "90" if rarity > 2 else "70"
     typ = weapon.get("weaponText")
@@ -244,7 +244,6 @@ def fetch_weapon_detail(weapon: dict, weapon_stats: dict) -> tuple:
     base_stat = weapon.get("baseStatText", str())
     effect_name = weapon.get("effectName", str())
     effects = weapon.get("effectTemplateRaw", str())
-    story = weapon.get("story")
     if effects:
         effects = BeautifulSoup(effects, "html.parser").text
         r1 = weapon["r1"]["values"] if weapon.get("r1") else []
@@ -259,7 +258,7 @@ def fetch_weapon_detail(weapon: dict, weapon_stats: dict) -> tuple:
         effects = effects.format(*key)
     img_suf = weapon["images"]["filename_gacha"]
     img = add_background(img_suf, rarity, name)
-    max_stats = weapon_stats["stats"][max_level]
+    max_stats = weapon_stats[max_level]
     max_base_atk = round(max_stats.get("attack"))
     max_main_stat = max_stats.get("specialized")
     if main_stat:
@@ -274,8 +273,7 @@ def fetch_weapon_detail(weapon: dict, weapon_stats: dict) -> tuple:
     caption += f"**Base ATK:** `{base_atk}` ➜ `{max_base_atk}` __(Lvl {max_level})__\n"
     if main_stat:
         caption += f"**{main_stat}:** `{base_stat}` ➜ `{max_main_stat}` __(Lvl {max_level})__\n"
-    story = split_text(story, list_size=2000)
-    caption += f"`{(story[:2000] + '…') if len(story) > 2000 else story}`\n\n"
+    caption += f"`{(des[:2000] + '…') if len(des) > 2000 else des}`\n\n"
     if effects:
         caption += f"**{effect_name}** +\n"
         caption += f"```{effects}```"

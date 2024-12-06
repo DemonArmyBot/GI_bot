@@ -56,6 +56,7 @@ async def parse_and_send_rss(data: dict, chat_ids: list = None):
     try:
         chats = chat_ids or conf.RSS_CHAT.split()
         pic = data.get("pic")
+        content = data.get("content")
         summary = sanitize_text(data.get("summary"))
         tgh_link = str()
         title = data.get("title")

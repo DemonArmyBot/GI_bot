@@ -221,14 +221,14 @@ async def weapon_handler(event, args, client):
             return
     try:
         reply = event.reply_to_message
-        status = await event.reply("`Fetching weapon details for …`")
+        status = await event.reply(f"`Fetching weapon details for {args}…`")
         weapon = await get_gi_info("weapons", args)
         if not weapon:
             return await status.edit(
                 f"**Weapon not found.**\nYou searched for `{args}`."
             )
         weapon_stats = await get_gi_info("weapons", args, stats=True)
-        await status.edit(f"`Building weapon card for '{weapon.get('name')}'…`")
+        await status.edit(f"`Building weapon card for {weapon.get('name')}…`")
         pic, caption = await fetch_weapon_detail(weapon, weapon_stats)
         await clean_reply(event, reply, "reply_photo", photo=pic, caption=caption)
     except Exception:

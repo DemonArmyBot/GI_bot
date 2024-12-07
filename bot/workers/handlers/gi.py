@@ -14,7 +14,7 @@ from bot.utils.gi_utils import (
     get_enka_profile2,
     get_gi_info,
 )
-from bot.utils.log_utils import log, logger
+from bot.utils.log_utils import logger
 from bot.utils.msg_utils import (
     clean_reply,
     get_args,

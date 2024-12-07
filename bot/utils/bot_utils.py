@@ -39,8 +39,8 @@ def create_api_token(retries=10):
 
 
 async def post_to_tgph(title, text):
-    author = (await bot.client.get_me()).first_name
-    author_url = f"https://t.me/{((await bot.client.get_me()).username)}"
+    bot.author = (await bot.client.get_me()).first_name if not bot.author else bot.author
+    bot.author_url = f"https://t.me/{((await bot.client.get_me()).username)}" if not bot.author_url else bot.author_url
 
     retries = 10
     while retries:

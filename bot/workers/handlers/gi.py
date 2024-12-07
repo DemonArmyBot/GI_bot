@@ -2,7 +2,6 @@ import asyncio
 import io
 import itertools
 
-import requests
 from bs4 import BeautifulSoup
 from PIL import Image
 
@@ -300,7 +299,7 @@ async def add_background(image_suf: str, rarity: int, name: str = "weapon"):
 
     # Download the image
     image_url = f"https://gi.yatta.moe/assets/UI/{image_suf}.png"
-    
+
     raw_img = await dl_to_memory(image_url)
 
     # Create an Image object from the downloaded content

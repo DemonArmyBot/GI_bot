@@ -1,4 +1,3 @@
-import aiohttp
 from aiohttp_retry import RetryClient
 from encard import encard, update_namecard
 from enkacard import enc_error, encbanner

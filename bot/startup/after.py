@@ -1,10 +1,10 @@
-import aiohttp
 import signal
+
+import aiohttp
 
 from bot import asyncio, bot, conf, sys, version_file
 from bot.fun.emojis import enmoji, enmoji2
 from bot.fun.quips import enquip, enquip2
-from bot.utils.gi_utils import requests
 from bot.utils.log_utils import logger
 from bot.utils.rss_utils import scheduler
 

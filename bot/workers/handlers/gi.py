@@ -303,7 +303,7 @@ async def add_background(image_suf: str, rarity: int, name: str = "weapon"):
     resp = await async_dl(image_url)
 
     # Create an Image object from the downloaded content
-    img = Image.open(resp.content)
+    img = Image.open((await resp.content.read()))
 
     # Create a gold/purple/blue/green/white background image with the same
     # size as the input image

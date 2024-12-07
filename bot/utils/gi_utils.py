@@ -1,4 +1,4 @@
-from aiohttp_retry import RetryClient, RandomRetry
+from aiohttp_retry import RandomRetry, RetryClient
 from encard import encard, update_namecard
 from enkacard import enc_error, encbanner
 

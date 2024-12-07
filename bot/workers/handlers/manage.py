@@ -24,6 +24,7 @@ async def restart_handler(event, args, client):
         return
     try:
         rst = event.reply("**Restarting Please Wait…**")
+        await bot.requests.close()
         message = str(rst.chat.id) + ":" + str(rst.id)
         re_x("restart", message)
     except Exception:
@@ -38,6 +39,7 @@ async def update_handler(event, args, client):
             return
         upt_mess = "Updating…"
         reply = await event.reply(f"`{upt_mess}`")
+        await bot.requests.close()
         updater(reply)
     except Exception:
         await logger(Exception)

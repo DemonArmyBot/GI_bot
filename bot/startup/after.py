@@ -1,8 +1,10 @@
+import aiohttp
 import signal
 
 from bot import asyncio, bot, conf, sys, version_file
 from bot.fun.emojis import enmoji, enmoji2
 from bot.fun.quips import enquip, enquip2
+from bot.utils.gi_utils import requests
 from bot.utils.log_utils import logger
 from bot.utils.rss_utils import scheduler
 
@@ -49,6 +51,7 @@ async def on_termination(loop):
     except Exception:
         pass
     # More cleanup code?
+    await bot.requests.close()
     exit()
 
 
@@ -56,6 +59,7 @@ async def on_startup():
     try:
         scheduler.start()
         loop = asyncio.get_running_loop()
+        bot.requests = aiohttp.ClientSession(loop=loop)
         for signame in {"SIGINT", "SIGTERM", "SIGABRT"}:
             loop.add_signal_handler(
                 getattr(signal, signame),

@@ -24,12 +24,12 @@ async def get_gi_info(folder="characters", query="chiori", direct=False, stats=F
     return info
 
 
-async def dl_to_memory(url):
+async def async_dl(url):
     retry_options = RandomRetry(attempts=10)
     retry_requests = RetryClient(bot.requests)
     async with retry_requests.get(url, retry_options=retry_options) as result:
         assert result.status == 200
-        return await result.read()
+    return result
 
 
 async def enka_update():

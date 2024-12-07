@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 from PIL import Image
 
 from bot.utils.gi_utils import (
-    dl_to_memory,
+    async_dl,
     enka_update,
     get_enka_card,
     get_enka_card2,
@@ -300,10 +300,10 @@ async def add_background(image_suf: str, rarity: int, name: str = "weapon"):
     # Download the image
     image_url = f"https://api.hakush.in/gi/UI/{image_suf}.webp"
 
-    raw_img = await dl_to_memory(image_url)
+    resp = await async_dl(image_url)
 
     # Create an Image object from the downloaded content
-    img = Image.open(raw_img)
+    img = Image.open(resp.content)
 
     # Create a gold/purple/blue/green/white background image with the same
     # size as the input image

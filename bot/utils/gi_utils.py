@@ -3,6 +3,7 @@ from encard import encard, update_namecard
 from enkacard import enc_error, encbanner
 
 from bot import bot
+
 from .log_utils import logger
 
 uri = "https://genshin-db-api.vercel.app/api/v5/{}?query={}&dumpResult=true"

@@ -17,7 +17,7 @@ async def get_gi_info(folder="characters", query="chiori", direct=False, stats=F
     field = "stats" if stats else "result"
     retry_options = RandomRetry(attempts=10)
     retry_requests = RetryClient(bot.requests)
-    result = retry_requests.post(url, retry_options=retry_options)
+    result = await retry_requests.post(url, retry_options=retry_options)
     if direct:
         return await result.json()
     info = (await result.json()).get(field)
@@ -27,7 +27,7 @@ async def get_gi_info(folder="characters", query="chiori", direct=False, stats=F
 async def async_dl(url):
     retry_options = RandomRetry(attempts=10)
     retry_requests = RetryClient(bot.requests)
-    result = retry_requests.get(url, retry_options=retry_options)
+    result = await retry_requests.get(url, retry_options=retry_options)
     assert result.status == 200
     return result
 

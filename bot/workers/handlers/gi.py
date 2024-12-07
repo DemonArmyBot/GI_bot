@@ -298,7 +298,7 @@ async def add_background(image_suf: str, rarity: int, name: str = "weapon"):
     }
 
     # Download the image
-    image_url = f"https://gi.yatta.moe/assets/UI/{image_suf}.png"
+    image_url = f"https://api.hakush.in/gi/UI/{image_suf}.webp"
 
     raw_img = await dl_to_memory(image_url)
 

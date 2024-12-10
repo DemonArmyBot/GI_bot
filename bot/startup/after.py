@@ -15,7 +15,7 @@ async def update_enka_assets():
     if bot.enka_dict.get("Updated"):
         return
     await enka_update()
-    bot.enka_dict.update("Updated": True)
+    bot.enka_dict.update({"Updated": True})
     save_enka_db()
     
 

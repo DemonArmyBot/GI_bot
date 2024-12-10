@@ -224,9 +224,11 @@ async def weapon_handler(event, args, client):
         status = await event.reply(f"`Fetching weapon details for {args}…`")
         weapon = await get_gi_info("weapons", args)
         if not weapon:
-            return await status.edit(
+            await status.edit(
                 f"**Weapon not found.**\nYou searched for `{args}`."
             )
+            status = None
+            return
         weapon_stats = await get_gi_info("weapons", args, stats=True)
         await status.edit(f"`Building weapon card for {weapon.get('name')}…`")
         pic, caption = await fetch_weapon_detail(weapon, weapon_stats)

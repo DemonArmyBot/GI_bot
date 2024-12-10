@@ -58,6 +58,8 @@ class Config:
 
 class Runtime_Config:
     def __init__(self):
+        self.author = None
+        self.author_url = None
         self.banned = []
         self.client = None
         self.docker_deployed = False

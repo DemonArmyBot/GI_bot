@@ -14,6 +14,8 @@ from bot.utils.rss_utils import scheduler
 async def update_enka_assets():
     if bot.enka_dict.get("Updated"):
         return
+    await logger(e="Updating enka assets…")
+    await logger(e=("=" * 15))
     await enka_update()
     bot.enka_dict.update({"Updated": True})
     save_enka_db()

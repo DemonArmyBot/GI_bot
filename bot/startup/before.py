@@ -4,7 +4,7 @@ from pymongo import MongoClient
 
 from bot import LOGS, bot, bot_id, conf, os, sys, version_file
 from bot.utils.bot_utils import create_api_token
-from bot.utils.local_db_utils import load_local_db
+from bot.utils.local_db_utils import load_enka_db, load_local_db
 from bot.utils.os_utils import file_exists
 
 LOGS.info("=" * 30)
@@ -68,3 +68,4 @@ else:
     load_local_db()
 
 create_api_token()
+load_enka_db()

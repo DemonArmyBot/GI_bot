@@ -25,6 +25,7 @@ from .config import bot, conf
 bot_id = conf.BOT_TOKEN.split(":", 1)[0]
 local_rdb = ".local_rssdb.pkl"
 local_budb = ".banned_users.pkl"
+local_enkadb = ".local_enkadb.pkl"
 log_file_name = "logs.txt"
 rss_dict_lock = asyncio.Lock()
 uptime = time.time()

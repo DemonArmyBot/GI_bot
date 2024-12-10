@@ -44,6 +44,7 @@ async def rss_monitor():
             feed_list = []
             while True:
                 try:
+                    author = rss_d.entries[feed_count].get("author")
                     item_title = rss_d.entries[feed_count]["title"]
                     pic = get_pic_url(rss_d.entries[feed_count])
                     if content := rss_d.entries[feed_count].get("content"):
@@ -77,6 +78,7 @@ async def rss_monitor():
                 if not parse:
                     continue
                 feed_ = {
+                    "author": author,
                     "link": url,
                     "pic": pic,
                     "content": content,

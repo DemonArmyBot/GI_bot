@@ -5,9 +5,19 @@ import aiohttp
 from bot import asyncio, bot, conf, sys, version_file
 from bot.fun.emojis import enmoji, enmoji2
 from bot.fun.quips import enquip, enquip2
+from bot.utils.gi_utils import enka_update
+from bot.utils.local_db_utils import save_enka_db
 from bot.utils.log_utils import logger
 from bot.utils.rss_utils import scheduler
 
+
+async def update_enka_assets():
+    if bot.enka_dict.get("Updated"):
+        return
+    await enka_update()
+    bot.enka_dict.update("Updated": True)
+    save_enka_db()
+    
 
 async def onrestart():
     try:
@@ -57,6 +67,7 @@ async def on_termination(loop):
 
 async def on_startup():
     try:
+        await update_enka_assets()
         scheduler.start()
         loop = asyncio.get_running_loop()
         bot.requests = aiohttp.ClientSession(loop=loop)

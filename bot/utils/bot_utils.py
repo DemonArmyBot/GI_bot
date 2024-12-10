@@ -54,8 +54,8 @@ async def post_to_tgph(title, text):
             page = await sync_to_async(
                 bot.tgp_client.post,
                 title=title,
-                author=author,
-                author_url=author_url,
+                author=bot.author,
+                author_url=bot.author_url,
                 text=text,
             )
             return page

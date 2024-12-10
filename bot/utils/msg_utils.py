@@ -54,6 +54,7 @@ def sanitize_text(text: str) -> str:
 
 async def parse_and_send_rss(data: dict, chat_ids: list = None):
     try:
+        author = data.get("author")
         chats = chat_ids or conf.RSS_CHAT.split()
         pic = data.get("pic")
         content = data.get("content")
@@ -61,6 +62,7 @@ async def parse_and_send_rss(data: dict, chat_ids: list = None):
         tgh_link = str()
         title = data.get("title")
         url = data.get("link")
+        # auth_text = f" by {author}" if author else str()
         caption = f">**[{title}]({url})**"
         caption += f"\n`{summary or str()}`"
         if content:
@@ -70,7 +72,7 @@ async def parse_and_send_rss(data: dict, chat_ids: list = None):
                     + "<strong>...<strong><br><br><strong>(TRUNCATED DUE TO CONTENT EXCEEDING MAX LENGTH)<strong>"
                 )
             tgh_link = (await post_to_tgph("Genshin_impact", content))["url"]
-            caption += f"\n\n>**[Telegraph]({tgh_link})**"
+            caption += f"\n\n>**[Telegraph]({tgh_link})** __({author})__"
         media = build_media(caption, pic)
         expanded_chat = []
         for chat in chats:

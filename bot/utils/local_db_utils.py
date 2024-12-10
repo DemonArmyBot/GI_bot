@@ -1,6 +1,6 @@
 import pickle
 
-from bot import bot, local_budb, local_rdb
+from bot import bot, local_budb, local_enkadb, local_rdb
 
 from .bot_utils import list_to_str
 from .os_utils import file_exists
@@ -27,3 +27,15 @@ def save2db_lcl2(db):
     elif db == "rss":
         with open(local_rdb, "wb") as file:
             pickle.dump(bot.rss_dict, file)
+
+
+def load_enka_db():
+    if file_exists(local_enkadb):
+        with open(local_enkadb, "rb") as file:
+            local_dict = pickle.load(file)
+        bot.enka_dict.update(local_dict)
+
+
+def save_enka_db():
+    with open(local_enkadb, "wb") as file:
+        pickle.dump(bot.enka_dict, file)

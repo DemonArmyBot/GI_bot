@@ -1,4 +1,5 @@
 aiohttp
+aiohttp_retry
 apscheduler
 beautifulsoup4
 feedparser

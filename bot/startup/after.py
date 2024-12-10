@@ -17,7 +17,7 @@ async def update_enka_assets():
     await enka_update()
     bot.enka_dict.update({"Updated": True})
     save_enka_db()
-    
+
 
 async def onrestart():
     try:

@@ -104,7 +104,7 @@ async def send_rss(caption, chat, media, pic, top_id):
             await avoid_flood(
                 bot.client.send_photo,
                 chat,
-                pic,
+                pic[0],
                 caption,
                 reply_to_message_id=top_id,
             )

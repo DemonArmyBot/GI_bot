@@ -23,7 +23,7 @@ async def restart_handler(event, args, client):
     if not user_is_owner(event.from_user.id):
         return
     try:
-        rst = event.reply("**Restarting Please Wait…**")
+        rst = await event.reply("**Restarting Please Wait…**")
         await bot.requests.close()
         message = str(rst.chat.id) + ":" + str(rst.id)
         re_x("restart", message)

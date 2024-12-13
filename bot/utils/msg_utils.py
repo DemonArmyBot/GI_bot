@@ -71,7 +71,7 @@ async def parse_and_send_rss(data: dict, chat_ids: list = None):
                     content[:65430]
                     + "<strong>...<strong><br><br><strong>(TRUNCATED DUE TO CONTENT EXCEEDING MAX LENGTH)<strong>"
                 )
-            tgh_link = (await post_to_tgph("Genshin_impact", content))["url"]
+            tgh_link = (await post_to_tgph(title, content))["url"]
             caption += f"\n\n>**[Telegraph]({tgh_link})** __({author})__"
         media = build_media(caption, pic)
         expanded_chat = []

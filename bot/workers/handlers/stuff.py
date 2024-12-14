@@ -6,7 +6,7 @@ from bot import bot, pyro_errors
 from bot.utils.bot_utils import get_json, list_to_str
 from bot.utils.db_utils import save2db2
 from bot.utils.log_utils import logger
-from bot.utils.msg_utils import msg_from_codes, pm_is_allowed, user_is_allowed, user_is_owner
+from bot.utils.msg_utils import pm_is_allowed, user_is_allowed, user_is_owner
 
 meme_list = []
 
@@ -63,7 +63,9 @@ async def getmeme(event, args, client, edit=False, user=None):
         reply_markup = InlineKeyboardMarkup([[ref_button]])
         if args:
             link += f"/{args}" if not args.isdigit() else str()
-        caption, url, filename, nsfw = await gen_meme(link, (event.chat.type.value == "private"))
+        caption, url, filename, nsfw = await gen_meme(
+            link, (event.chat.type.value == "private")
+        )
         if not url:
             if nsfw:
                 return await event.reply("**NSFW is blocked!**")

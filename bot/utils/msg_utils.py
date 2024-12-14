@@ -42,7 +42,9 @@ def get_msg_from_codes(codes: list, auto: bool = False):
         link = f"https://genshin.hoyoverse.com/en/gift?code={code.get('code')}"
         msg += f"**{no}.** **{link}**\n**Reward:** `{code.get('rewards')}`"
         msg += "\n\n"
-    msg += ">_I'm a bot and this action was performed automatically._" if auto else str()
+    msg += (
+        ">_I'm a bot and this action was performed automatically._" if auto else str()
+    )
     return msg
 
 

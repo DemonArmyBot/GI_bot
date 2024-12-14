@@ -12,9 +12,7 @@ async def gift_code_monitor():
     try:
         if not bot.gift_dict["chats"]:
             return
-        response = await get_json(
-            "https://hoyo-codes.seria.moe/codes?game=genshin"
-        )
+        response = await get_json("https://hoyo-codes.seria.moe/codes?game=genshin")
         new_codes = []
         _to_db = []
         for codes in response.get("codes"):

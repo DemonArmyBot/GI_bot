@@ -70,7 +70,7 @@ class Runtime_Config:
         self.max_message_length = 4096
         self.offline = False
         self.paused = False
-        self.get_json = {}
+        self.gift_dict = {}
         self.rss_dict = {}
         self.rss_ran_once = False
         self.version = None

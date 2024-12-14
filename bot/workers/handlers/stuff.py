@@ -1,3 +1,5 @@
+import asyncio
+
 from pyrogram.filters import regex
 from pyrogram.handlers import CallbackQueryHandler
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, InputMediaPhoto
@@ -174,7 +176,7 @@ async def getgiftcodes(event, args, client):
             return
     link = "https://hoyo-codes.seria.moe/codes?game=genshin"
     try:
-        reply = await event.reply("*Fetching latest giftcodes…*")
+        reply = await event.reply("**Fetching latest giftcodes…**")
         result = await get_json(link)
         msg = get_msg_from_codes(result.get("codes"))
         await event.reply(msg)
@@ -182,7 +184,7 @@ async def getgiftcodes(event, args, client):
         await reply.delete()
     except Exception as e:
         await logger(Exception)
-        return await event.reply(f"*Error:*\n{e}")
+        return await event.reply(f"**Error:**\n{e}")
 
 
 async def hello(event, args, client):

@@ -131,7 +131,7 @@ async def manage_autogift_chat(event, args, client):
             if arg[1].casefold() not in ("default", "."):
                 msg = "**Invalid chat!**"
                 return
-            arg[1] = None if arg[1] != "." else event.chat.id
+            arg[1] = None if arg[1] != "." else str(event.chat.id)
         if arg[0] == "-add":
             if arg[1] in bot.gift_dict["chats"]:
                 msg = "**Chat already added!**"
@@ -180,7 +180,7 @@ async def getgiftcodes(event, args, client):
         result = await get_json(link)
         msg = get_msg_from_codes(result.get("codes"))
         await event.reply(msg)
-        await asyncio.sleep(5)
+        await asyncio.sleep(1)
         await reply.delete()
     except Exception as e:
         await logger(Exception)

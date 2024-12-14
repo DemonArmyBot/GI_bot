@@ -43,7 +43,7 @@ def get_msg_from_codes(codes: list, auto: bool = False):
         msg += f"**{no}.** **{link}**\n**Reward:** `{code.get('rewards')}`"
         msg += "\n\n"
     msg += (
-        ">_I'm a bot and this action was performed automatically._" if auto else str()
+        ">__I'm a bot and this action was performed automatically.__" if auto else str()
     )
     return msg
 

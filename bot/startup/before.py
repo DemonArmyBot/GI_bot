@@ -30,6 +30,9 @@ if not os.path.isdir("enka/"):
     os.mkdir("enka/")
 
 
+bot.gift_dict.update({"codes": [], "chats": []})
+
+
 def load_db(_db, _key, var, var_type=None):
     queries = _db.find({"_id": bot_id})
     raw = None
@@ -57,13 +60,15 @@ if conf.DATABASE_URL:
     db = cluster[conf.DBNAME]
     rssdb = db["rss"]
     userdb = db["users"]
+    miscdb = db["misc"]
 
     load_db(userdb, "banned_users", bot.banned, "list")
+    load_db(miscdb, "gift", bot.gift_dict, "dict")
     load_db(rssdb, "rss", bot.rss_dict, "dict")
 
 
 else:
-    rssdb = userdb = None
+    rssdb = userdb = miscdb = None
 
     load_local_db()
 

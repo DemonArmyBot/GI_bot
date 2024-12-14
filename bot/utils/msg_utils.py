@@ -1,4 +1,5 @@
 import argparse
+import itertools
 import re
 from functools import partial
 
@@ -33,6 +34,16 @@ def pm_is_allowed(event):
     if event.chat.type.value == "private":
         return not bot.ignore_pm
     return True
+
+
+def get_msg_from_codes(codes: list, auto: bool = False):
+    msg = "**Genshin Impact Redeem Codes**\n\n"
+    for code, no in zip(codes, itertools.count(1)):
+        link = f"https://genshin.hoyoverse.com/en/gift?code={code.get('code')}"
+        msg += f"**{no}.** **{link}**\n**Reward:** `{code.get('rewards')}`"
+        msg += "\n\n"
+    msg += ">_I'm a bot and this action was performed automatically._" if auto else str()
+    return msg
 
 
 def build_media(caption, pics):

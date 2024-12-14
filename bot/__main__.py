@@ -9,7 +9,7 @@ from .workers.handlers.manage import (
     rss_handler,
     update_handler,
 )
-from .workers.handlers.stuff import getmeme, hello
+from .workers.handlers.stuff import getgiftcodes, getmeme, hello
 
 
 @bot.client.on_message(filters.incoming & filters.command(["start", "help"]))
@@ -50,6 +50,11 @@ async def _(client, message):
 @bot.client.on_message(filters.incoming & filters.command("meme"))
 async def _(client, message):
     await event_handler(message, getmeme)
+
+
+@bot.client.on_message(filters.incoming & filters.command("codes"))
+async def _(client, message):
+    await event_handler(message, getgiftcodes)
 
 
 @bot.client.on_message(filters.incoming & filters.command("rss"))

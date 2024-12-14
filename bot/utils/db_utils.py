@@ -2,7 +2,7 @@ from pymongo.errors import ServerSelectionTimeoutError
 
 from bot import asyncio, bot_id
 from bot.config import bot, conf
-from bot.startup.before import pickle, rssdb, userdb
+from bot.startup.before import miscdb, pickle, rssdb, userdb
 
 from .bot_utils import list_to_str, sync_to_async
 from .local_db_utils import save2db_lcl2
@@ -31,7 +31,7 @@ async def save2db(db, update, retries=3):
 
 async def save2db2(data: dict | str = False, db: str = None):
     if not database:
-        if data is False or db == "rss":
+        if data is False or db in ("gift", "rss"):
             await sync_to_async(save2db_lcl2, db)
         return
     if data is False:
@@ -44,4 +44,7 @@ async def save2db2(data: dict | str = False, db: str = None):
     _update = {db: p_data}
     if db == "rss":
         await save2db(rssdb, _update)
+        return
+    if db == "gift":
+        await save2db(miscdb, _update)
         return

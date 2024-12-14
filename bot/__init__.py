@@ -23,6 +23,7 @@ from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from .config import bot, conf
 
 bot_id = conf.BOT_TOKEN.split(":", 1)[0]
+local_gdb = ".local_giftdb.pkl"
 local_rdb = ".local_rssdb.pkl"
 local_budb = ".banned_users.pkl"
 local_enkadb = ".local_enkadb.pkl"
@@ -74,6 +75,7 @@ if sys.version_info < (3, 10):
 LOGS.info("Starting...")
 
 bot.ignore_pm = conf.IGNORE_PM
+bot.block_nsfw = conf.BLOCK_NSFW
 bot.tgp_client = TelegraphPoster(use_api=True, telegraph_api_url=conf.TELEGRAPH_API)
 
 try:

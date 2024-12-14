@@ -6,7 +6,12 @@ from bot import bot, pyro_errors
 from bot.utils.bot_utils import get_json, list_to_str
 from bot.utils.db_utils import save2db2
 from bot.utils.log_utils import logger
-from bot.utils.msg_utils import get_msg_from_codes, pm_is_allowed, user_is_allowed, user_is_owner
+from bot.utils.msg_utils import (
+    get_msg_from_codes,
+    pm_is_allowed,
+    user_is_allowed,
+    user_is_owner,
+)
 
 meme_list = []
 

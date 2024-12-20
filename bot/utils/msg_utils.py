@@ -16,6 +16,7 @@ from .bot_utils import gfn, post_to_tgph
 from .gi_utils import async_dl
 from .log_utils import log, logger
 
+
 def user_is_allowed(user: str | int):
     user = str(user)
     return user not in bot.banned
@@ -60,6 +61,7 @@ async def download_pics_to_memory(*pics):
         except Exception:
             await logger(Exception)
     return in_mem
+
 
 def build_media(caption, pics):
     if len(pics) < 2:

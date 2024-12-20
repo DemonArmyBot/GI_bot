@@ -1,4 +1,5 @@
 import argparse
+import io
 import itertools
 import re
 from functools import partial
@@ -12,8 +13,8 @@ from bot.fun.quips import enquip3
 from bot.others.exceptions import ArgumentParserError
 
 from .bot_utils import gfn, post_to_tgph
+from .gi_utils import async_dl
 from .log_utils import log, logger
-
 
 def user_is_allowed(user: str | int):
     user = str(user)
@@ -48,6 +49,18 @@ def get_msg_from_codes(codes: list, auto: bool = False):
     return msg
 
 
+async def download_pics_to_memory(*pics):
+    in_mem = []
+    for pic in pics:
+        try:
+            response = await async_dl(pic)
+            img = io.BytesIO((await response.content.read()))
+            img.name = pic.split("/")[-1]
+            in_mem.append(img)
+        except Exception:
+            await logger(Exception)
+    return in_mem
+
 def build_media(caption, pics):
     if len(pics) < 2:
         return None
@@ -70,6 +83,7 @@ async def parse_and_send_rss(data: dict, chat_ids: list = None):
         author = data.get("author")
         chats = chat_ids or conf.RSS_CHAT.split()
         pic = data.get("pic")
+        pics = await download_pics_to_memory(*pic)
         content = data.get("content")
         summary = sanitize_text(data.get("summary"))
         tgh_link = str()
@@ -86,7 +100,7 @@ async def parse_and_send_rss(data: dict, chat_ids: list = None):
                 )
             tgh_link = (await post_to_tgph(title, content))["url"]
             caption += f"\n\n>**[Telegraph]({tgh_link})** __({author})__"
-        media = build_media(caption, pic)
+        media = build_media(caption, pics)
         expanded_chat = []
         for chat in chats:
             (
@@ -99,12 +113,12 @@ async def parse_and_send_rss(data: dict, chat_ids: list = None):
             chat, top_id = (
                 map(int, top_chat) if len(top_chat) > 1 else (int(top_chat[0]), None)
             )
-            await send_rss(caption, chat, media, pic, top_id)
+            await send_rss(caption, chat, media, pics, top_id)
     except Exception:
         await logger(Exception)
 
 
-async def send_rss(caption, chat, media, pic, top_id):
+async def send_rss(caption, chat, media, pics, top_id):
     try:
         if media:
             await avoid_flood(
@@ -113,11 +127,11 @@ async def send_rss(caption, chat, media, pic, top_id):
                 media,
                 reply_to_message_id=top_id,
             )
-        elif pic:
+        elif pics:
             await avoid_flood(
                 bot.client.send_photo,
                 chat,
-                pic[0],
+                pics[0],
                 caption,
                 reply_to_message_id=top_id,
             )

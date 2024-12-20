@@ -374,11 +374,25 @@ async def rss_sub(event, args, client):
             event.reply,
             f"This title **{title}** has already been subscribed!. **Please choose another title!**",
         )
+    chat = []
+    if arg.chat:
+        _current = False
+        _default = False
+        for chat_ in arg.chat.split():
+            if chat_ == ".":
+                if _current:
+                    continue
+                chat_ = str(event.chat.id)
+                _current =True
+            if chat_.casefold() != "default":
+                chat.append(chat_)
+            else:
+                if _default:
+                    continue
+                chat.append(None)
+                _default = True
     inf_lists = []
     exf_lists = []
-    msg = str()
-    # if arg.chat:
-    # arg.chat = int(arg.chat)
     if arg.inf:
         filters_list = arg.inf.split("|")
         for x in filters_list:
@@ -389,6 +403,7 @@ async def rss_sub(event, args, client):
         for x in filters_list:
             y = x.split(" or ")
             exf_lists.append(y)
+    msg = str()
     try:
         rss_d = feedparse(feed_link)
         last_title = rss_d.entries[0]["title"]
@@ -404,18 +419,6 @@ async def rss_sub(event, args, client):
         msg += f"\n**Chat:-** `{arg.chat or 'Default'}`"
         msg += f"\n**Filters:-**\ninf: `{arg.inf}`\nexf: `{arg.exf}`"
         msg += f"\n**Paused:-** `{arg.p}`"
-        chat = []
-        if arg.chat:
-            _default = False
-            for chat_ in arg.chat.split():
-                chat_ = str(event.chat.id) if chat_ == "." else chat_
-                if chat_.casefold() != "default":
-                    chat.append(chat_)
-                else:
-                    if _default:
-                        continue
-                    chat.append(None)
-                    _default = True
         async with rss_dict_lock:
             bot.rss_dict[title] = {
                 "link": feed_link,

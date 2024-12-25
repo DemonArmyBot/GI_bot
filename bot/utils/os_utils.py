@@ -1,4 +1,6 @@
+import asyncio
 import os
+import shlex
 import shutil
 import sys
 from pathlib import Path
@@ -86,3 +88,20 @@ def read_n_to_last_line(filename, n=1):
 
 def file_exists(file):
     return Path(file).is_file()
+
+async def os_run(self, cmd: List[str]):
+    cmd_str = shlex.join(cmd) if any(" " in part for part in cmd) else " ".join(cmd)
+    popen = await asyncio.create_subprocess_shell(
+        cmd_str if os.name == "nt" else shlex.join(cmd) ,
+        stderr=asyncio.subprocess.PIPE,
+        stdout=asyncio.subprocess.PIPE,
+        stdin=subprocess.DEVNULL,
+        # shell=True if os.name == "nt" else False,
+    )
+    stdout, stderr = await popen.communicate()  # type: ignore
+    if popen.returncode != 0:
+        raise RuntimeError(
+            f"stderr: {stderr} Return code: {popen.returncode}"  # type: ignore
+        )
+    return stdout
+

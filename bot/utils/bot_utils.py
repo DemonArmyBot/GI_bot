@@ -1,5 +1,6 @@
 import asyncio
 import itertools
+import uuid
 from concurrent.futures import ThreadPoolExecutor
 from functools import partial
 
@@ -7,6 +8,8 @@ import aiohttp
 import requests
 
 from bot import LOGS, bot, telegraph_errors, time
+
+from .os_utils import os_run, s_remove
 
 THREADPOOL = ThreadPoolExecutor(max_workers=1000)
 
@@ -104,3 +107,29 @@ async def get_json(link):
     async with aiohttp.ClientSession() as requests:
         result = await requests.get(link)
         return await result.json()
+
+async def convert_gif_2_mp4(raw):
+    name = str(uuid.uuid4()) + ".gif"
+    with open(name, 'wb') as file:
+        file.write(raw)
+    out = name[:-3] + "mp4"
+    await self.os_run(
+        [
+            "ffmpeg",
+            "-i",
+            name,
+            "-movflags",
+            "faststart",
+            "-pix_fmt",
+            "yuv420p",
+            "-vf",
+            "scale=trunc(iw/2)*2:trunc(ih/2)*2",
+            "-crf",
+            "17",
+            out,
+        ]
+    )
+    with open(temp, "rb") as file:
+        buf = file.read()
+    s_remove(name, out)
+    return buf

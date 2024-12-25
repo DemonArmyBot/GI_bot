@@ -12,7 +12,7 @@ from bot.config import bot, conf
 from bot.fun.quips import enquip3
 from bot.others.exceptions import ArgumentParserError
 
-from .bot_utils import gfn, post_to_tgph
+from .bot_utils import convert_gif_2_mp4, gfn, post_to_tgph
 from .gi_utils import async_dl
 from .log_utils import log, logger
 
@@ -50,13 +50,18 @@ def get_msg_from_codes(codes: list, auto: bool = False):
     return msg
 
 
-async def download_pics_to_memory(*pics):
+async def download_media_to_memory(*pics):
     in_mem = []
     for pic in pics:
         try:
+            name = pic.split("/")[-1]
             response = await async_dl(pic)
-            img = io.BytesIO((await response.content.read()))
-            img.name = pic.split("/")[-1]
+            media = await response.content.read()
+            if name.endswith(".gif"):
+                media = await convert_gif_2_mp4(media)
+                name = name[:-3] + "mp4"
+            img = io.BytesIO(media)
+            img.name = name
             in_mem.append(img)
         except Exception:
             await logger(Exception)
@@ -68,9 +73,8 @@ def build_media(caption, pics):
         return None
     media = []
     for pic in pics:
-        log(e=pic.name)
         if pic.name.endswith(".gif"):
-            media.append(InputMediaAnimation(pic, caption=caption))
+            media.append(InputMediaVideo(pic, caption=caption))
         else:
             media.append(InputMediaPhoto(pic, caption=caption))
         caption = None
@@ -89,7 +93,7 @@ async def parse_and_send_rss(data: dict, chat_ids: list = None):
         author = data.get("author")
         chats = chat_ids or conf.RSS_CHAT.split()
         pic = data.get("pic")
-        pics = await download_pics_to_memory(*pic)
+        pics = await download_media_to_memory(*pic)
         content = data.get("content")
         summary = sanitize_text(data.get("summary"))
         tgh_link = str()
@@ -135,9 +139,7 @@ async def send_rss(caption, chat, media, pics, top_id):
             )
         elif pics:
             send_media = bot.client.send_photo
-            if pics[0].endswith(".jpg"):
-                pass
-            elif pics[0].endswith(".gif"):
+            if pics[0].name.endswith(".mp4"):
                 send_media = bot.client.send_animation
             await avoid_flood(
                 send_media,

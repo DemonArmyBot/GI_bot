@@ -130,7 +130,7 @@ async def convert_gif_2_mp4(raw):
             out,
         ]
     )
-    with open(temp, "rb") as file:
+    with open(out, "rb") as file:
         buf = file.read()
     s_remove(name, out)
     return buf

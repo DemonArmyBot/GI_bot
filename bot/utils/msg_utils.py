@@ -68,6 +68,7 @@ def build_media(caption, pics):
         return None
     media = []
     for pic in pics:
+        log(e=pic.name)
         if pic.name.endswith(".gif"):
             media.append(InputMediaAnimation(pic, caption=caption))
         else:

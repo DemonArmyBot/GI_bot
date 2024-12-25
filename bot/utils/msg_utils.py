@@ -73,7 +73,7 @@ def build_media(caption, pics):
         return None
     media = []
     for pic in pics:
-        if pic.name.endswith(".gif"):
+        if pic.name.endswith(".mp4"):
             media.append(InputMediaVideo(pic, caption=caption))
         else:
             media.append(InputMediaPhoto(pic, caption=caption))

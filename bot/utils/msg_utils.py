@@ -5,7 +5,7 @@ import re
 from functools import partial
 
 from bs4 import BeautifulSoup
-from pyrogram.types import InputMediaPhoto
+from pyrogram.types import InputMediaPhoto, InputMediaVideo
 
 from bot import pyro_errors
 from bot.config import bot, conf

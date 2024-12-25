@@ -72,13 +72,19 @@ def build_media(caption, pics):
     if len(pics) < 2:
         return None
     media = []
+    medias = []
     for pic in pics:
         if pic.name.endswith(".mp4"):
             media.append(InputMediaVideo(pic, caption=caption))
         else:
             media.append(InputMediaPhoto(pic, caption=caption))
+        if len(media) == 10:
+            medias.append(media)
+            media = []
         caption = None
-    return media
+    if media:
+        medias.append(media)
+    return medias
 
 
 def sanitize_text(text: str) -> str:
@@ -110,7 +116,7 @@ async def parse_and_send_rss(data: dict, chat_ids: list = None):
                 )
             tgh_link = (await post_to_tgph(title, content))["url"]
             caption += f"\n\n>**[Telegraph]({tgh_link})** __({author})__"
-        media = build_media(caption, pics)
+        medias = build_media(caption, pics)
         expanded_chat = []
         for chat in chats:
             (
@@ -123,20 +129,21 @@ async def parse_and_send_rss(data: dict, chat_ids: list = None):
             chat, top_id = (
                 map(int, top_chat) if len(top_chat) > 1 else (int(top_chat[0]), None)
             )
-            await send_rss(caption, chat, media, pics, top_id)
+            await send_rss(caption, chat, medias, pics, top_id)
     except Exception:
         await logger(Exception)
 
 
-async def send_rss(caption, chat, media, pics, top_id):
+async def send_rss(caption, chat, medias, pics, top_id):
     try:
-        if media:
-            await avoid_flood(
-                bot.client.send_media_group,
-                chat,
-                media,
-                reply_to_message_id=top_id,
-            )
+        if medias:
+            for media in medias:
+                await avoid_flood(
+                    bot.client.send_media_group,
+                    chat,
+                    media,
+                    reply_to_message_id=top_id,
+                )
         elif pics:
             send_media = bot.client.send_photo
             if pics[0].name.endswith(".mp4"):

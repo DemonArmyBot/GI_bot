@@ -90,7 +90,7 @@ def file_exists(file):
     return Path(file).is_file()
 
 
-async def os_run(self, cmd: List[str]):
+async def os_run(self, cmd: list[str]):
     cmd_str = shlex.join(cmd) if any(" " in part for part in cmd) else " ".join(cmd)
     popen = await asyncio.create_subprocess_shell(
         cmd_str if os.name == "nt" else shlex.join(cmd),

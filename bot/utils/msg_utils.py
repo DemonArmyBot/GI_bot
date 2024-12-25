@@ -74,7 +74,10 @@ def build_media(caption, pics):
     media = []
     medias = []
     for pic in pics:
-        caption_ = caption if str(len(media)).endswith("1") else None
+        caption_ = None
+        if not media:
+            caption_ = caption
+            caption_ += f"\n**#{(1 + len(medias))}**" if medias else None
         if pic.name.endswith(".mp4"):
             media.append(InputMediaVideo(pic, caption=caption_))
         else:

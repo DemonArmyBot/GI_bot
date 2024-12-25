@@ -5,7 +5,7 @@ import re
 from functools import partial
 
 from bs4 import BeautifulSoup
-from pyrogram.types import InputMediaPhoto
+from pyrogram.types import InputMediaAnimation, InputMediaPhoto
 
 from bot import pyro_errors
 from bot.config import bot, conf
@@ -68,7 +68,10 @@ def build_media(caption, pics):
         return None
     media = []
     for pic in pics:
-        media.append(InputMediaPhoto(pic, caption=caption))
+        if pic.name.endswith(".gif"):
+            media.append(InputMediaAnimation(pic, caption=caption))
+        else:
+            media.append(InputMediaPhoto(pic, caption=caption))
         caption = None
     return media
 
@@ -130,8 +133,13 @@ async def send_rss(caption, chat, media, pics, top_id):
                 reply_to_message_id=top_id,
             )
         elif pics:
+            send_media = bot.client.send_photo
+            if pics[0].endswith(".jpg"):
+                pass
+            elif pics[0].endswith(".gif"):
+                send_media = bot.client.send_animation
             await avoid_flood(
-                bot.client.send_photo,
+                send_media,
                 chat,
                 pics[0],
                 caption,

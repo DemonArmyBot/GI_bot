@@ -74,14 +74,14 @@ def build_media(caption, pics):
     media = []
     medias = []
     for pic in pics:
+        caption_ = caption if str(len(media)).endswith("1") else None
         if pic.name.endswith(".mp4"):
-            media.append(InputMediaVideo(pic, caption=caption))
+            media.append(InputMediaVideo(pic, caption=caption_))
         else:
-            media.append(InputMediaPhoto(pic, caption=caption))
+            media.append(InputMediaPhoto(pic, caption=caption_))
         if len(media) == 10:
             medias.append(media)
             media = []
-        caption = None
     if media:
         medias.append(media)
     return medias

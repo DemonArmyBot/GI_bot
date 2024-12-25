@@ -9,7 +9,7 @@ import requests
 
 from bot import LOGS, bot, telegraph_errors, time
 
-from .os_utils import s_remove
+from .os_utils import os_run, s_remove
 
 THREADPOOL = ThreadPoolExecutor(max_workers=1000)
 
@@ -114,7 +114,7 @@ async def convert_gif_2_mp4(raw):
     with open(name, "wb") as file:
         file.write(raw)
     out = name[:-3] + "mp4"
-    await self.os_run(
+    await os_run(
         [
             "ffmpeg",
             "-i",

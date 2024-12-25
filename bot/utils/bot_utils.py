@@ -9,7 +9,7 @@ import requests
 
 from bot import LOGS, bot, telegraph_errors, time
 
-from .os_utils import os_run, s_remove
+from .os_utils import s_remove
 
 THREADPOOL = ThreadPoolExecutor(max_workers=1000)
 
@@ -108,9 +108,10 @@ async def get_json(link):
         result = await requests.get(link)
         return await result.json()
 
+
 async def convert_gif_2_mp4(raw):
     name = str(uuid.uuid4()) + ".gif"
-    with open(name, 'wb') as file:
+    with open(name, "wb") as file:
         file.write(raw)
     out = name[:-3] + "mp4"
     await self.os_run(

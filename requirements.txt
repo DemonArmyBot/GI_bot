@@ -7,10 +7,12 @@ html_telegraph_poster
 lxml[html_clean]
 pymongo
 python-decouple
+pytz
 #pyrogram
 tgcrypto
-git+https://github.com/Nubuki-all/EnkaCard
 git+https://github.com/Nubuki-all/ENCard
+git+https://github.com/Nubuki-all/EnkaCard
+git+https://github.com/Nubuki-all/enka-card
 https://github.com/KurimuzonAkuma/pyrogram/archive/dev.zip
 #Snyk pins 
 certifi>=2023.7.22 # not directly required, pinned by Snyk to avoid a vulnerability

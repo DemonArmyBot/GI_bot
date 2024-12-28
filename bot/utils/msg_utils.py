@@ -55,10 +55,10 @@ async def download_media_to_memory(*pics):
     for pic in pics:
         try:
             name = pic.split("/")[-1]
-            response = await async_dl(pic)
-            media = await response.content.read()
             if name.endswith(".png"):
                 continue
+            response = await async_dl(pic)
+            media = await response.content.read()
             if name.endswith(".gif"):
                 media = await convert_gif_2_mp4(media)
                 name = name[:-3] + "mp4"

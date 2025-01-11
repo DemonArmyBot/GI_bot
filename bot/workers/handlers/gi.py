@@ -573,9 +573,7 @@ async def get_events(event, args, client):
             msg += f"\n**{strt}** **{time_formatter(tl) or 'Unavailable.'}**\n"
         chain = event
         for text in split_text(msg, "\n\n"):
-            chain = await clean_reply(
-                chain, reply, "reply", text
-                )
+            chain = await clean_reply(chain, reply, "reply", text)
             reply = None
     except Exception:
         await logger(Exception)

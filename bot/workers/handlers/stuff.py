@@ -7,7 +7,7 @@ from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, InputMedi
 from bot import bot, pyro_errors
 from bot.utils.bot_utils import get_json
 from bot.utils.log_utils import logger
-from bot.utils.msg_utils import pm_is_allowed, user_is_allowed, user_is_owner
+from bot.utils.msg_utils import download_media_to_memory, pm_is_allowed, user_is_allowed, user_is_owner
 
 meme_list = []
 
@@ -50,6 +50,7 @@ async def getmeme(event, args, client, edit=False, user=None):
     Arguments:
     subreddit - custom subreddit
     """
+    mem_file = None
     user = user or event.from_user.id
     if not user_is_owner(user):
         if not pm_is_allowed(event):
@@ -71,12 +72,21 @@ async def getmeme(event, args, client, edit=False, user=None):
             if nsfw:
                 return await event.reply("**NSFW is blocked!**")
             return await event.reply("**Request Failed!**")
+        if url.endswith(".gif"):
+            mem_file = await download_media_to_memory(url)
         if not edit:
+            if mem_file:
+                return await event.reply_video(
+                    caption=caption, video=mem_file, has_spoiler=nsfw, reply_markup=reply_markup
+                )
             return await event.reply_photo(
                 caption=caption, photo=url, has_spoiler=nsfw, reply_markup=reply_markup
             )
-        photo = InputMediaPhoto(media=url, caption=caption, has_spoiler=nsfw)
-        return await event.edit_media(photo, reply_markup=reply_markup)
+        if mem_file:
+            media = InputMediaVideo(media=mem_file, caption=caption, has_spoiler=nsfw)
+        else:
+            media = InputMediaPhoto(media=url, caption=caption, has_spoiler=nsfw)
+        return await event.edit_media(media, reply_markup=reply_markup)
         # time.sleep(3)
     except pyro_errors.BadRequest as e:
         if e.ID == "MEDIA_EMPTY":

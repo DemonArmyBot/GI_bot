@@ -2,7 +2,13 @@ from . import LOGS, bot, filters, traceback
 from .startup.after import on_startup
 from .utils.msg_utils import event_handler
 from .workers.handlers.dev import bash, eval_message, get_logs
-from .workers.handlers.gi import enka_handler, get_events, getgiftcodes, random_challenge, weapon_handler
+from .workers.handlers.gi import (
+    enka_handler,
+    get_events,
+    getgiftcodes,
+    random_challenge,
+    weapon_handler,
+)
 from .workers.handlers.manage import (
     pause_handler,
     restart_handler,

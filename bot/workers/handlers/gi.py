@@ -396,7 +396,6 @@ async def getgiftcodes(event, args, client):
         return await event.reply(f"**Error:**\n{e}")
 
 
-
 async def send_verbose_event(event_list, event, reply):
     chain = event
     for e in event_list:

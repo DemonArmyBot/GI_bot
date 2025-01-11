@@ -91,11 +91,11 @@ def build_media(caption, pics):
     return medias
 
 
-def sanitize_text(text: str) -> str:
+def sanitize_text(text: str, truncate=True) -> str:
     if not text:
         return text
     text = BeautifulSoup(text, "html.parser").text
-    return (text[:900] + "…") if len(text) > 900 else text
+    return (text[:900] + "…") if len(text) > 900 and truncate else text
 
 
 async def parse_and_send_rss(data: dict, chat_ids: list = None):

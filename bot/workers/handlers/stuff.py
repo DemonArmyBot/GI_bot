@@ -1,3 +1,5 @@
+from datetime import datetime as dt
+
 from pyrogram.filters import regex
 from pyrogram.handlers import CallbackQueryHandler
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, InputMediaPhoto
@@ -107,5 +109,20 @@ async def hello(event, args, client):
     except Exception:
         await logger(Exception)
 
+
+async def up(event, args, client):
+    """ping bot!"""
+    if not user_is_allowed(event.from_user.id):
+        return await event.delete()
+    ist = dt.now()
+    msg = await event.reply("…")
+    st = dt.now()
+    ims = (st - ist).microseconds / 1000
+    msg1 = "**Pong! ——** `{}`__ms__"
+    st = dt.now()
+    await msg.edit(msg1.format(ims))
+    ed = dt.now()
+    ms = (ed - st).microseconds / 1000
+    await msg.edit(f"1. {msg1.format(ims)}\n2. {msg1.format(ms)}")
 
 bot.client.add_handler(CallbackQueryHandler(refmeme, filters=regex("^refmeme")))

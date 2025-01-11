@@ -15,7 +15,7 @@ from .workers.handlers.manage import (
     rss_handler,
     update_handler,
 )
-from .workers.handlers.stuff import getmeme, hello
+from .workers.handlers.stuff import getmeme, hello, up
 
 
 @bot.client.on_message(filters.incoming & filters.command(["start", "help"]))
@@ -56,6 +56,11 @@ async def _(client, message):
 @bot.client.on_message(filters.incoming & filters.command("rchallenge"))
 async def _(client, message):
     await event_handler(message, random_challenge)
+
+
+@bot.client.on_message(filters.incoming & filters.command("ping"))
+async def _(client, message):
+    await event_handler(message, up)
 
 
 @bot.client.on_message(filters.incoming & filters.command("events"))

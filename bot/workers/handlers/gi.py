@@ -420,7 +420,11 @@ async def send_verbose_event(event_list, event, reply):
         msg += f"\n**End date:** `{get_date_from_ts(dict_['end_time'])}`"
         if dict_.get("upcoming") or dict_["start_time"] > time.time():
             strt = "Starts in:"
-            tl = dict_["start_time"] - time.time() if get_date_from_ts(dict_["start_time"]) else 0
+            tl = (
+                dict_["start_time"] - time.time()
+                if get_date_from_ts(dict_["start_time"])
+                else 0
+            )
         else:
             strt = "Time left:"
             tl = dict_["end_time"] - time.time()
@@ -566,7 +570,11 @@ async def get_events(event, args, client):
             msg += f"\nEnd date: `{get_date_from_ts(dict_['end_time'])}`"
             if dict_.get("upcoming") or dict_["start_time"] > time.time():
                 strt = "Starts in:"
-                tl = dict_["start_time"] - time.time() if get_date_from_ts(dict_["start_time"]) else 0
+                tl = (
+                    dict_["start_time"] - time.time()
+                    if get_date_from_ts(dict_["start_time"])
+                    else 0
+                )
             else:
                 strt = "Time left:"
                 tl = dict_["end_time"] - time.time()

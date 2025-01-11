@@ -34,8 +34,8 @@ async def gen_meme(link, pm=False):
             return None, None, None, True
         meme_list.append(pl)
         sb = result.get("subreddit")
-        nsfw_text = "*🔞 NSFW*\n"
-        caption = f"{nsfw_text if nsfw else str()}*{title.strip()}*\n{pl}\n\nBy u/{author} in r/{sb}"
+        nsfw_text = "**🔞 NSFW**\n"
+        caption = f"{nsfw_text if nsfw else str()}**{title.strip()}**\n{pl}\n\nBy u/{author} in r/{sb}"
         url = result.get("url")
         filename = f"{_id}.{url.split('.')[-1]}"
         break

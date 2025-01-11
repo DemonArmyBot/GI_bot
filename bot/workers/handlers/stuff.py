@@ -96,7 +96,9 @@ async def getmeme(event, args, client, edit=False, user=None):
                 caption=caption, photo=url, has_spoiler=nsfw, reply_markup=reply_markup
             )
         if mem_files:
-            media = InputMediaVideo(media=mem_files[0], caption=caption, has_spoiler=nsfw)
+            media = InputMediaVideo(
+                media=mem_files[0], caption=caption, has_spoiler=nsfw
+            )
         else:
             media = InputMediaPhoto(media=url, caption=caption, has_spoiler=nsfw)
         return await event.edit_media(media, reply_markup=reply_markup)

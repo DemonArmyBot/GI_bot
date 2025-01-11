@@ -1,15 +1,29 @@
 import asyncio
-import io
-import itertools
+import time
+from inspect import getdoc
 
 from bs4 import BeautifulSoup
-from PIL import Image
 
+from bot.config import bot
+from bot.utils.bot_utils import (
+    get_date_from_ts,
+    get_json,
+    get_text,
+    get_timestamp,
+    time_formatter,
+)
+from bot.utils.db_utils import save2db2
 from bot.utils.gi_utils import (
-    async_dl,
     enka_update,
+    fetch_random_boss,
+    fetch_random_character,
+    fetch_weapon_detail,
+    get_challenge_image,
+    get_character_image,
+    get_character_info_fallback,
     get_enka_card,
     get_enka_card2,
+    get_enka_card3,
     get_enka_profile,
     get_enka_profile2,
     get_gi_info,
@@ -18,7 +32,9 @@ from bot.utils.log_utils import logger
 from bot.utils.msg_utils import (
     clean_reply,
     get_args,
+    get_msg_from_codes,
     pm_is_allowed,
+    sanitize_text,
     user_is_allowed,
     user_is_owner,
 )
@@ -31,25 +47,28 @@ async def enka_handler(event, args, client):
     Requires character build for the specified uid to be public
 
     Arguments:
-    uid: {genshin player uid} (Required)
-    -c or --card {character name}: use quotes if the name has spaces eg:- "Hu tao"; Also supports lookups
-    -cs or --cards {characters} same as -c but for multiple characters; delimited by commas
-    -t <int> {template}: card generation template; currently only two templates exist; default 1
+        uid: {genshin player uid} (Required)
+        -c or --card or --character {character name}*: use quotes if the name has spaces eg:- "Hu tao"; Also supports lookups
+        -cs or --cards or --characters {characters} same as -c but for multiple characters; delimited by commas
+        -t <int> {template}: card generation template; currently only two templates exist; default 1
     Flags:
-    -v2: Get cards in new template
-    -d or --dump: Dump all character build from the given uid
-    -p or --profile: To get player card instead
-    --hide_uid: Hide uid in card
-    --no_top: Remove akasha ranking from card
-    --update: update library
+        -v2: Get cards in new template
+        -v3: Get cards in (another) new template
+        -d or --dump: Dump all character build from the given uid
+        -ls or --list: List all currently showcased characters
+        -p or --profile: To get player card instead (v3 not supported)
+        --hide_uid: Hide uid in card
+        --no_top: Remove akasha ranking from card
+        --update: update library
 
     Examples:
-    123454697855 -c "Hu tao" -t 2 --hide_uid
-        - retrieves the current build for Hu tao from the given uid with uid hidden while using the second template
-    123456789 -p -t 2
-        - retrieves profile card using the second template for the given uid
+    123454697855 -c "Hu tao" -v2 --hide_uid
+        - retrieves the current build for Hu tao from the given uid with uid hidden while using the new template
+    123456789 -p -v3
+        - retrieves profile card using the new template for the given uid
     12345678900 -c xq
         - retrieves the current build for whatever matches the character name provided; in this case Xingqui
+    *Now supports last three digits of character id too
     """
     error = None
     status = None
@@ -60,7 +79,7 @@ async def enka_handler(event, args, client):
         if not user_is_allowed(user):
             return
     try:
-        arg, args = get_args(
+        arg, unknown = get_args(
             ["--hide_uid", "store_true"],
             ["--no_top", "store_false"],
             ["--update", "store_true"],
@@ -68,18 +87,33 @@ async def enka_handler(event, args, client):
             "-cs",
             "--card",
             "--cards",
+            "--character",
+            "--characters",
             ["-d", "store_true"],
             ["--dump", "store_true"],
             ["-p", "store_true"],
             ["--profile", "store_true"],
             ["-v2", "store_true"],
+            ["-v3", "store_true"],
+            ["-ls", "store_true"],
+            ["--list", "store_true"],
             "-t",
             to_parse=args,
             get_unknown=True,
         )
-        card = arg.c or arg.card
-        cards = arg.cs or arg.cards
+        unknowns = unknown.split()
+        invalid = str()
+        uid = None
+        for unkwn in unknowns:
+            if unkwn.isdigit() and not uid:
+                uid = unkwn
+                continue
+            invalid += f"{unkwn} "
+        invalid = invalid.rstrip()
+        card = arg.c or arg.card or arg.character
+        cards = arg.cs or arg.cards or arg.characters
         dump = arg.d or arg.dump
+        list_ = arg.ls or arg.list
         prof = arg.p or arg.profile
         akasha = arg.no_top
         reply = event.reply_to_message
@@ -89,20 +123,31 @@ async def enka_handler(event, args, client):
             if not (card or cards or dump or prof):
                 return await u_reply.edit("Updated enka assets.")
             await u_reply.delete()
-        if not (card or cards or dump or prof):
-            return await event.reply(f"```{enka_handler.__doc__}```")
+        if not (card or cards or dump or prof or list_):
+            return await event.reply(f"```{getdoc(enka_handler)}```")
+        if not uid:
+            if invalid:
+                await event.reply(f"`{invalid}`?")
+            return await event.reply(f"**Please supply a UID**")
+        if invalid:
+            await event.reply(f"**Warning:** No idea what '`{invalid}`' means.")
         if arg.t not in ("1", "2"):
             arg.t = 1
-        profile, error = await get_enka_profile(args)
+        profile, error = await get_enka_profile(uid)
         if error:
             result = profile
             return
+        if list_:
+            characters = list_characters(profile.characters.character_name)
+            await event.reply(characters)
+            if not (card or cards or dump or prof):
+                return
         status = await event.reply("`Fetching card(s), Please Wait…`")
         if prof:
             cprofile, error = (
-                await get_enka_profile(args, card=True, template=arg.t)
+                await get_enka_profile(uid, card=True, template=arg.t)
                 if not arg.v2
-                else await get_enka_profile2(args, huid=arg.hide_uid)
+                else await get_enka_profile2(uid, huid=arg.hide_uid)
             )
             if error:
                 return
@@ -117,17 +162,31 @@ async def enka_handler(event, args, client):
         if card:
             info = await get_gi_info(query=card)
             if not info:
+                (
+                    await status.edit(
+                        f"Character with name; `{card}` not found.\nTrying workaround…"
+                    )
+                    if not card.isdigit()
+                    else None
+                )
+                info = (
+                    await get_character_info_fallback(card)
+                    if card.casefold() != "traveler"
+                    else info
+                )
+            if not info:
                 return await event.reply(
-                    f"**Character not found.**\nYou searched for {card}.\nNot what you searched for?\nTry again with double quotes"
+                    f"**Character not found.**\nYou searched for `{card}`.\nNot what you searched for?\nTry again with double quotes"
                 )
             char_id = info.get("id")
-            result, error = (
-                await get_enka_card(
-                    args, char_id, akasha=akasha, huid=arg.hide_uid, template=arg.t
+            if arg.v2:
+                result, error = await get_enka_card2(uid, char_id, arg.hide_uid)
+            elif arg.v3:
+                result, error = await get_enka_card3(uid, char_id)
+            else:
+                result, error = await get_enka_card(
+                    uid, char_id, akasha=akasha, huid=arg.hide_uid, template=arg.t
                 )
-                if not arg.v2
-                else await get_enka_card2(args, char_id, arg.hide_uid)
-            )
             if error:
                 return
             caption = f"{profile.player.name}'s current {info.get('name')} build"
@@ -135,9 +194,7 @@ async def enka_handler(event, args, client):
             path = "enka/" + file_name
             if not result.card:
                 error = True
-                characters = (
-                    list_charcters(result.character_name) if not arg.v2 else str()
-                )
+                characters = list_characters(profile.characters.character_name)
                 result = f"`{card}` **not found in showcase!**"
                 result += f"\n\n{characters}" if characters else str()
                 return
@@ -152,6 +209,7 @@ async def enka_handler(event, args, client):
             for name in cards.split(","):
                 name = name.strip()
                 info = await get_gi_info(query=name)
+                info = await get_character_info_fallback(card) if not info else info
                 if not info:
                     errors += f"{name}, "
                     continue
@@ -162,35 +220,36 @@ async def enka_handler(event, args, client):
             if not ids:
                 return await event.reply(error_txt)
             ids = ids.strip(",")
-            result, error = (
-                await get_enka_card(
-                    args, ids, akasha=akasha, huid=arg.hide_uid, template=arg.t
+            if arg.v2:
+                result, error = await get_enka_card2(uid, ids, huid=arg.hide_uid)
+            elif arg.v3:
+                result, error = await get_enka_card3(uid, ids)
+            else:
+                result, error = await get_enka_card(
+                    uid, ids, akasha=akasha, huid=arg.hide_uid, template=arg.t
                 )
-                if not arg.v2
-                else await get_enka_card2(args, ids, huid=arg.hide_uid)
-            )
             if error:
                 return
 
             if errors:
                 await event.reply(error_txt)
+
             if not result.card:
                 error = True
-                characters = (
-                    list_charcters(result.character_name) if not arg.v2 else str()
-                )
+                characters = list_characters(profile.characters.character_name)
                 result = f"`{cards}` **not found in showcase!**"
                 result += f"\n\n{characters}" if characters else str()
                 return
             return await send_multi_cards(event, reply, result, profile)
         if dump:
-            result, error = (
-                await get_enka_card(
-                    args, None, akasha=akasha, huid=arg.hide_uid, template=arg.t
+            if arg.v2:
+                result, error = await get_enka_card2(uid, str(), huid=arg.hide_uid)
+            elif arg.v3:
+                result, error = await get_enka_card3(uid, str())
+            else:
+                result, error = await get_enka_card(
+                    uid, None, akasha=akasha, huid=arg.hide_uid, template=arg.t
                 )
-                if not arg.v2
-                else await get_enka_card2(args, str(), huid=arg.hide_uid)
-            )
             if error:
                 return
             return await send_multi_cards(event, reply, result, profile)
@@ -251,95 +310,379 @@ async def weapon_handler(event, args, client):
         await status.edit(f"`Building weapon card for {weapon.get('name')}…`")
         pic, caption = await fetch_weapon_detail(weapon, weapon_stats)
         await clean_reply(event, reply, "reply_photo", photo=pic, caption=caption)
-    except Exception:
+    except Exception as e:
         await logger(Exception)
+        await status.edit(f"**Error:**\n`{e}`")
+        status = None
     finally:
         if status:
             await status.delete()
 
 
-async def fetch_weapon_detail(weapon: dict, weapon_stats: dict) -> tuple:
-    name = weapon.get("name")
-    des = weapon.get("description")
-    rarity = weapon.get("rarity")
-    max_level = "90" if rarity > 2 else "70"
-    typ = weapon.get("weaponText")
-    base_atk = round(weapon.get("baseAtkValue"))
-    main_stat = weapon.get("mainStatText", str())
-    base_stat = weapon.get("baseStatText", str())
-    effect_name = weapon.get("effectName", str())
-    effects = weapon.get("effectTemplateRaw", str())
-    if effects:
-        effects = BeautifulSoup(effects, "html.parser").text
-        r1 = weapon["r1"]["values"] if weapon.get("r1") else []
-        r2 = weapon["r2"]["values"] if weapon.get("r2") else []
-        r3 = weapon["r3"]["values"] if weapon.get("r3") else []
-        r4 = weapon["r4"]["values"] if weapon.get("r4") else []
-        r5 = weapon["r5"]["values"] if weapon.get("r5") else []
-        key = [
-            f'**{f"{a}/{b}/{c}/{d}/{e}".split("/None", maxsplit=1)[0]}**'
-            for a, b, c, d, e in itertools.zip_longest(r1, r2, r3, r4, r5)
-        ]
-        effects = effects.format(*key)
-    img_suf = weapon["images"]["filename_gacha"]
-    img = await add_background(img_suf, rarity, name)
-    max_stats = weapon_stats[max_level]
-    max_base_atk = round(max_stats.get("attack"))
-    max_main_stat = max_stats.get("specialized")
-    if main_stat:
-        if max_main_stat > 1:
-            max_main_stat = round(max_main_stat)
+async def manage_autogift_chat(event, args, client):
+    user = event.from_user.id
+    if not user_is_owner(user):
+        return
+    try:
+        msg = str()
+        arg = args.split(maxsplit=1)
+        if len(arg) == 1:
+            if arg[0] != "-g":
+                return
+            if not bot.gift_dict["chats"]:
+                msg = "No chat set!"
+                return
+            msg = list_to_str(bot.gift_dict["chats"], sep=", ")
+            return
         else:
-            max_main_stat = f"{round(max_main_stat * 100)}%"
-    caption = f"**{name}**\n"
-    caption += f"{'⭐' * rarity}\n\n"
-    caption += f"**Rarity:** `{'★' * rarity}`\n"
-    caption += f"**Type:** `{typ}`\n"
-    caption += f"**Base ATK:** `{base_atk}` ➜ `{max_base_atk}` __(Lvl {max_level})__\n"
-    if main_stat:
-        caption += f"**{main_stat}:** `{base_stat}` ➜ `{max_main_stat}` __(Lvl {max_level})__\n"
-    caption += f"`{(des[:2000] + '…') if len(des) > 2000 else des}`\n\n"
-    if effects:
-        caption += f"**{effect_name}** +\n"
-        caption += f">{effects}"
+            if not arg[0] in ("-add", "-rm"):
+                return
+        if not arg[1].split(":")[0].isdigit():
+            if arg[1].casefold() not in ("default", "."):
+                msg = "**Invalid chat!**"
+                return
+            arg[1] = None if arg[1] != "." else str(event.chat.id)
+        if arg[0] == "-add":
+            if arg[1] in bot.gift_dict["chats"]:
+                msg = "**Chat already added!**"
+                return
+            bot.gift_dict["chats"].append(arg[1])
+            await save2db2(bot.gift_dict, "gift")
+            msg = f"**{arg[1] or 'default'}** has been added."
+            return
+        if arg[0] == "-rm":
+            if not arg[1] in bot.gift_dict["chats"]:
+                msg = "**Given chat was never added!**"
+                return
+            bot.gift_dict["chats"].remove(arg[1])
+            await save2db2(bot.gift_dict, "gift")
+            msg = f"**{arg[1] or 'default'}** has been removed."
+            return
+    except Exception:
+        await logger(Exception)
+    finally:
+        if msg:
+            await event.reply(msg)
 
-    return img, caption
 
-
-async def add_background(image_suf: str, rarity: int, name: str = "weapon"):
-    """Fetches image and adds a background.
-
-    Args:
-        image_suf: identifier for image.
-        rarity: rarity of item
+async def getgiftcodes(event, args, client):
     """
-    # Dict for associating rarity with background color
-    color = {
-        1: (126, 126, 128, 255),
-        2: (78, 126, 110, 255),
-        3: (84, 134, 169, 255),
-        4: (127, 103, 161, 255),
-        5: (176, 112, 48, 255),
-    }
+    Fetches a lastest genshin giftcodes
+    Uses hoyo-codes.seria.moe
 
-    # Download the image
-    image_url = f"https://api.hakush.in/gi/UI/{image_suf}.webp"
+    Arguments:
+        -add
+        -rm
+        -get
+     add, remove and get chats for auto giftcodes
+    """
+    if args:
+        return await manage_autogift_chat(event, args, client)
+    user = event.from_user.id
+    if not user_is_owner(user):
+        if not pm_is_allowed(event):
+            return
+        if not user_is_allowed(user):
+            return
+    link = "https://hoyo-codes.seria.moe/codes?game=genshin"
+    try:
+        reply = await event.reply("**Fetching latest giftcodes…**")
+        result = await get_json(link)
+        msg = get_msg_from_codes(result.get("codes"))
+        await event.reply(msg)
+        await reply.delete()
+    except Exception as e:
+        await logger(Exception)
+        return await event.reply(f"**Error:**\n{e}")
 
-    resp = await async_dl(image_url)
 
-    # Create an Image object from the downloaded content
-    img = io.BytesIO((await resp.content.read()))
-    img = Image.open(img)
 
-    # Create a gold/purple/blue/green/white background image with the same
-    # size as the input image
-    background = Image.new("RGBA", img.size, color.get(rarity))  # color with alpha
+async def send_verbose_event(event_list, event, reply):
+    chain = event
+    for e in event_list:
+        name = list(e.keys())[0]
+        dict_ = e.get(name)
+        if dict_["end_time"] < time.time():
+            continue
+        link = dict_.get("link")
+        msg = f"**{dict_['name']}**"
+        msg += f"\n\n**Type:** `{dict_['type_name']}`"
+        if desc := dict_.get("description"):
+            if "\\n" in desc:
+                desc = desc.encode().decode("unicode_escape")
+        msg += f"\n\n**Description:** `{desc}`" if desc else str()
+        msg += (
+            f"\n\n**Rewards:** `{get_rewards(dict_['rewards'])}`"
+            if get_rewards(dict_.get("rewards", []))
+            else str()
+        )
+        msg += f"\n\n**Start date:** `{get_date_from_ts(dict_['start_time'])}`"
+        msg += f"\n**End date:** `{get_date_from_ts(dict_['end_time'])}`"
+        if dict_.get("upcoming") or dict_["start_time"] > time.time():
+            strt = "Starts in:"
+            tl = dict_["start_time"] - time.time()
+        else:
+            strt = "Time left:"
+            tl = dict_["end_time"] - time.time()
+        msg += f"\n\n**{strt}** **{time_formatter(tl)}**"
+        if link:
+            chain = await clean_reply(
+                chain,
+                reply,
+                "reply_photo",
+                photo=link,
+                caption=msg,
+            )
+        else:
+            chain = await clean_reply(chain, reply, "reply", msg)
+        reply = None
+        await asyncio.sleep(3)
 
-    # Paste the input image onto the background
-    background.paste(img, (0, 0), img)
 
-    # Save the output image
-    output = io.BytesIO()
-    background.save(output, format="png")
-    output.name = f"{name}.png"
-    return output
+async def get_events(event, args, client):
+    """
+    Get a list of current and upcoming genshin events
+    Argument:
+        -v: Get events with images
+    """
+    status = None
+    user = event.from_user.id
+    if not user_is_owner(user):
+        if not pm_is_allowed(event):
+            return
+        if not user_is_allowed(user):
+            return
+    try:
+        status = await event.reply("**Fetching events…**")
+        api = "https://api.ennead.cc/mihoyo/genshin/calendar"
+        link = "https://genshin-impact.fandom.com/wiki/Event"
+        response = await get_gi_info(get=api)
+        events = response.get("events")
+        web = await get_text(link)
+        soup = BeautifulSoup(web, "html.parser")
+        tables = soup.find_all("table", class_="wikitable sortable")
+        current_list = []
+        upcoming_list = []
+        event_list = []
+        temp_dict = {}
+        # Build initially event list
+        if events:
+            for event_ in events:
+                event_list.append({event_.get("name"): event_})
+
+        # Get Current Events
+        items = tables[0].find_all("td")
+        for item in items:
+            if value := item.find("img"):
+                temp_dict.update({"name": item.getText()})
+                link = value.get("src", str())
+                if link.startswith("data"):
+                    link = value.get("data-src", str())
+                if link:
+                    index = link.find(".png")
+                    link = link[: index + 4]
+                temp_dict.update({"link": link})
+            elif value := item.get("data-sort-value"):
+                svalue = get_timestamp(value[: len(value) // 2])
+                evalue = get_timestamp(value[len(value) // 2 :])
+                temp_dict.update({"start_time": svalue})
+                temp_dict.update({"end_time": evalue})
+            else:
+                value = item.getText()
+                temp_dict.update({"type_name": value})
+                current_list.append({temp_dict.get("name"): temp_dict})
+                temp_dict = {}
+
+        # Get Upcoming Events
+        items = tables[1].find_all("td")
+        for item in items:
+            if value := item.find("img"):
+                temp_dict.update({"name": value.get("alt")})
+                link = value.get("src", str())
+                if link.startswith("data"):
+                    link = value.get("data-src", str())
+                if link:
+                    index = link.find(".png")
+                    link = link[: index + 4]
+                temp_dict.update({"link": link})
+            elif value := item.get("data-sort-value"):
+                svalue = get_timestamp(value[: len(value) // 2])
+                evalue = get_timestamp(value[len(value) // 2 :])
+                temp_dict.update({"start_time": svalue})
+                temp_dict.update({"end_time": evalue})
+            else:
+                value = item.getText()
+                temp_dict.update({"type_name": value, "upcoming": True})
+                upcoming_list.append({temp_dict.get("name"): temp_dict})
+                temp_dict = {}
+
+        # Compare and combine events from different sources
+        for e in event_list:
+            name = list(e.keys())[0]
+            for l in upcoming_list:
+                if wiki_ver := l.get(name):
+                    if e[name].get("end_time"):
+                        wiki_ver.pop("upcoming")
+                    e[name].update(wiki_ver)
+                    continue
+            for c in current_list:
+                if wiki_ver := c.get(name):
+                    e[name].update(wiki_ver)
+                    continue
+
+        for c in current_list:
+            name = list(c.keys())[0]
+            present = False
+            for e in event_list:
+                if e.get(name):
+                    present = True
+            if not present:
+                event_list.append(c)
+
+        await status.edit("**Listing Current & Upcoming Events…**")
+
+        if args == "-v":
+            return await send_verbose_event(event_list, event, event.reply_to_message)
+
+        msg = "**List of Current & Upcoming Events:**"
+        for e in event_list:
+            name = list(e.keys())[0]
+            dict_ = e.get(name)
+            if dict_["end_time"] < time.time():
+                continue
+            msg += f"\n\n**⁍ {dict_['name']}**"
+            msg += f"\n**Type:** `{dict_['type_name']}`"
+            if desc := dict_.get("description"):
+                if "\\n" in desc:
+                    desc = desc.encode().decode("unicode_escape")
+            msg += f"\n>{desc}" if desc else str()
+            msg += (
+                f"\n**Rewards:** `{get_rewards(dict_['rewards'])}`"
+                if get_rewards(dict_.get("rewards", []))
+                else str()
+            )
+            msg += f"\nStart date: `{get_date_from_ts(dict_['start_time'])}`"
+            msg += f"\nEnd date: `{get_date_from_ts(dict_['end_time'])}`"
+            if dict_.get("upcoming") or dict_["start_time"] > time.time():
+                strt = "Starts in:"
+                tl = dict_["start_time"] - time.time()
+            else:
+                strt = "Time left:"
+                tl = dict_["end_time"] - time.time()
+            msg += f"\n**{strt}** **{time_formatter(tl)}**"
+        await event.reply(msg)
+    except Exception:
+        await logger(Exception)
+        await status.edit(f"**Error:**\n`{e}`")
+        status = None
+    finally:
+        if status:
+            await asyncio.sleep(3)
+            await status.delete()
+
+
+def get_stuff(name):
+    msg = str()
+    for thing in something:
+        msg += thing[name]
+        msg += ", "
+    return msg.strip(", ")
+
+
+def get_rewards(rewards):
+    msg = str()
+    for reward in rewards:
+        msg += reward["name"]
+        msg += f" x {reward['amount']}" if reward["amount"] else str()
+        msg += ", "
+    return msg.strip(", ")
+
+
+async def random_challenge(event, args, client):
+    """
+    Generates a completely random boss challenge;
+    No arguments are required
+    """
+    e = None
+    status = None
+    user = event.from_user.id
+    if not user_is_owner(user):
+        if not pm_is_allowed(event):
+            return
+        if not user_is_allowed(user):
+            return
+    try:
+        reply = event.reply_to_message
+        status = await event.reply(
+            "**Generating random challenge:**\n>Fetching random boss…"
+        )
+        boss = await fetch_random_boss()
+        if not boss:
+            e = "Couldn't fetch boss"
+            return
+        boss_name = boss["data"]["name"]
+        await status.edit(
+            f"**Generating random challenge:**\n>Fetching random boss: `{boss_name}`\n>Fetching random characters…"
+        )
+        characters = await fetch_random_character()
+        if not characters:
+            e = "Couldn't fetch characters"
+            return
+        func_list = []
+        await status.edit(
+            f"**Generating random challenge:**\n>Fetching random boss: `{boss_name}`\n>Fetching random characters images…"
+        )
+        for character in characters:
+            image = character["images"]["filename_icon"]
+            text = character["name"]
+            rarity = character["rarity"]
+            element = (
+                character["elementText"] if character["elementText"] != "None" else None
+            )
+            func = get_character_image(image, text, rarity, element=element)
+            func_list.append(func)
+        characters_img = await asyncio.gather(*func_list)
+        await status.edit(f"**Generating random challenge card…**")
+        boss_type = boss["data"]["type"]
+        icon = boss["data"]["icon"]
+        boss_spec = boss["data"]["specialName"]
+        if boss["data"]["tips"]:
+            tutorial_desc = list(boss["data"]["tips"].values())[0]["description"]
+            tutorial_desc = sanitize_text(tutorial_desc, truncate=False)
+            tutorial_img = list(boss["data"]["tips"].values())[0]["images"][0]
+        else:
+            tutorial_desc = None
+            tutorial_img = None
+        final_img = await get_challenge_image(
+            icon, tutorial_img, characters_img, boss_name, bottom_text="Challengers"
+        )
+        if not final_img:
+            e = "Couldn't generate card"
+            return
+
+        caption = f"**Boss name:** `{boss_name}`"
+        caption += f"\n**{boss_spec}**"
+        caption += f"\n**Boss type:** `{boss_type.rstrip('s') if not boss_type.endswith('ss') else boss_type}`"
+        if tutorial_desc:
+            caption += f"\n>{tutorial_desc}"
+        caption += f"\n\n"
+        caption += f"**Allowed characters:**"
+        for character in characters:
+            caption += f"\n**⁍** `{character['name']}`"
+        caption += "\n\n**Rules:**"
+        caption += "\n**1.** Characters can only be substituted for another when you don't have that character."
+        caption += "\n**2.** Only a character can be substituted. if you don't have two or more of the randomized characters, try again."
+        caption += "\n**3.** The substitute must share the same element and the same or lower rarity as the substituted character."
+        caption += "\n**Good luck!**"
+        await clean_reply(event, reply, "reply_photo", photo=final_img, caption=caption)
+    except Exception as err:
+        await logger(Exception)
+        if e:
+            await event.reply(e)
+        else:
+            await status.edit(f"**Error:**\n`{err}`")
+            status = None
+    finally:
+        if status:
+            await asyncio.sleep(1)
+            await status.delete()

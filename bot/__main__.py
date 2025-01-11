@@ -2,14 +2,14 @@ from . import LOGS, bot, filters, traceback
 from .startup.after import on_startup
 from .utils.msg_utils import event_handler
 from .workers.handlers.dev import bash, eval_message, get_logs
-from .workers.handlers.gi import enka_handler, weapon_handler
+from .workers.handlers.gi import enka_handler, get_events, getgiftcodes, random_challenge, weapon_handler
 from .workers.handlers.manage import (
     pause_handler,
     restart_handler,
     rss_handler,
     update_handler,
 )
-from .workers.handlers.stuff import getgiftcodes, getmeme, hello
+from .workers.handlers.stuff import getmeme, hello
 
 
 @bot.client.on_message(filters.incoming & filters.command(["start", "help"]))
@@ -45,6 +45,16 @@ async def _(client, message):
 @bot.client.on_message(filters.incoming & filters.command("weapon"))
 async def _(client, message):
     await event_handler(message, weapon_handler, require_args=True)
+
+
+@bot.client.on_message(filters.incoming & filters.command("rchallenge"))
+async def _(client, message):
+    await event_handler(message, random_challenge)
+
+
+@bot.client.on_message(filters.incoming & filters.command("events"))
+async def _(client, message):
+    await event_handler(message, get_events)
 
 
 @bot.client.on_message(filters.incoming & filters.command("meme"))

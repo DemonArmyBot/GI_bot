@@ -7,7 +7,12 @@ from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, InputMedi
 from bot import bot, pyro_errors
 from bot.utils.bot_utils import get_json
 from bot.utils.log_utils import logger
-from bot.utils.msg_utils import download_media_to_memory, pm_is_allowed, user_is_allowed, user_is_owner
+from bot.utils.msg_utils import (
+    download_media_to_memory,
+    pm_is_allowed,
+    user_is_allowed,
+    user_is_owner,
+)
 
 meme_list = []
 
@@ -77,7 +82,10 @@ async def getmeme(event, args, client, edit=False, user=None):
         if not edit:
             if mem_file:
                 return await event.reply_video(
-                    caption=caption, video=mem_file, has_spoiler=nsfw, reply_markup=reply_markup
+                    caption=caption,
+                    video=mem_file,
+                    has_spoiler=nsfw,
+                    reply_markup=reply_markup,
                 )
             return await event.reply_photo(
                 caption=caption, photo=url, has_spoiler=nsfw, reply_markup=reply_markup

@@ -10,6 +10,7 @@ from bot.utils.bot_utils import (
     get_json,
     get_text,
     get_timestamp,
+    split_text,
     time_formatter,
 )
 from bot.utils.db_utils import save2db2
@@ -419,11 +420,11 @@ async def send_verbose_event(event_list, event, reply):
         msg += f"\n**End date:** `{get_date_from_ts(dict_['end_time'])}`"
         if dict_.get("upcoming") or dict_["start_time"] > time.time():
             strt = "Starts in:"
-            tl = dict_["start_time"] - time.time()
+            tl = dict_["start_time"] - time.time() if dict_["start_time"] else 0
         else:
             strt = "Time left:"
             tl = dict_["end_time"] - time.time()
-        msg += f"\n\n**{strt}** **{time_formatter(tl)}**"
+        msg += f"\n\n**{strt}** **{time_formatter(tl) or 'Unavailable.'}**"
         if link:
             chain = await clean_reply(
                 chain,
@@ -455,6 +456,7 @@ async def get_events(event, args, client):
         status = await event.reply("**Fetching events…**")
         api = "https://api.ennead.cc/mihoyo/genshin/calendar"
         link = "https://genshin-impact.fandom.com/wiki/Event"
+        reply = event.reply_to_message
         response = await get_gi_info(get=api)
         events = response.get("events")
         web = await get_text(link)
@@ -564,12 +566,17 @@ async def get_events(event, args, client):
             msg += f"\nEnd date: `{get_date_from_ts(dict_['end_time'])}`"
             if dict_.get("upcoming") or dict_["start_time"] > time.time():
                 strt = "Starts in:"
-                tl = dict_["start_time"] - time.time()
+                tl = dict_["start_time"] - time.time() if dict_["start_time"] else 0
             else:
                 strt = "Time left:"
                 tl = dict_["end_time"] - time.time()
-            msg += f"\n**{strt}** **{time_formatter(tl)}**"
-        await event.reply(msg)
+            msg += f"\n**{strt}** **{time_formatter(tl) or 'Unavailable.'}**\n"
+        chain = event
+        for text in split_text(msg, "\n\n"):
+            chain = await clean_reply(
+                chain, reply, "reply", text
+                )
+            reply = None
     except Exception:
         await logger(Exception)
         await status.edit(f"**Error:**\n`{e}`")

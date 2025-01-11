@@ -60,7 +60,7 @@ async def getmeme(event, args, client, edit=False, user=None):
     Arguments:
     subreddit - custom subreddit
     """
-    mem_file = None
+    mem_files = None
     user = user or event.from_user.id
     if not user_is_owner(user):
         if not pm_is_allowed(event):
@@ -83,20 +83,20 @@ async def getmeme(event, args, client, edit=False, user=None):
                 return await event.reply("**NSFW is blocked!**")
             return await event.reply("**Request Failed!**")
         if url.endswith(".gif"):
-            mem_file = await download_media_to_memory(url)
+            mem_files = await download_media_to_memory(url)
         if not edit:
-            if mem_file:
+            if mem_files:
                 return await event.reply_video(
                     caption=caption,
-                    video=mem_file,
+                    video=mem_files[0],
                     has_spoiler=nsfw,
                     reply_markup=reply_markup,
                 )
             return await event.reply_photo(
                 caption=caption, photo=url, has_spoiler=nsfw, reply_markup=reply_markup
             )
-        if mem_file:
-            media = InputMediaVideo(media=mem_file, caption=caption, has_spoiler=nsfw)
+        if mem_files:
+            media = InputMediaVideo(media=mem_files[0], caption=caption, has_spoiler=nsfw)
         else:
             media = InputMediaPhoto(media=url, caption=caption, has_spoiler=nsfw)
         return await event.edit_media(media, reply_markup=reply_markup)

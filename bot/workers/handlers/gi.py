@@ -616,6 +616,7 @@ async def random_challenge(event, args, client):
     No arguments are required
     """
     e = None
+    spec_char = None
     status = None
     user = event.from_user.id
     if not user_is_owner(user):
@@ -636,7 +637,16 @@ async def random_challenge(event, args, client):
         await status.edit(
             f"**Generating random challenge:**\n>Fetching random boss: `{boss_name}`\n>Fetching random characters…"
         )
-        characters = await fetch_random_character()
+        if args:
+            spec_char = await get_gi_info(query=args)
+            if not spec_char:
+                await event.reply(f"**Character with name** '`{args}`' **not found.**")
+                await status.edit("**Retrying…**")
+                return await random_challenge(event, None, client)
+            other_chars = await fetch_random_character(3, exclude=spec_char)
+            (characters := [spec_char]).extend(other_chars)
+        else:
+            characters = await fetch_random_character()
         if not characters:
             e = "Couldn't fetch characters"
             return
@@ -681,6 +691,8 @@ async def random_challenge(event, args, client):
         caption += f"**Allowed characters:**"
         for character in characters:
             caption += f"\n**⁍** `{character['name']}`"
+            if spec_char and spec_char["name"] == character["name"]:
+                caption += " __(fixed)__"
         caption += "\n\n**Rules:**"
         caption += "\n**1.** Characters can only be substituted for another when you don't have that character."
         caption += "\n**2.** Only a character can be substituted. if you don't have two or more of the randomized characters, try again."
@@ -689,12 +701,11 @@ async def random_challenge(event, args, client):
         await clean_reply(event, reply, "reply_photo", photo=final_img, caption=caption)
     except Exception as err:
         await logger(Exception)
+        await status.edit(f"**Error:**\n`{err}`")
+        status = None
+    finally:
         if e:
             await event.reply(e)
-        else:
-            await status.edit(f"**Error:**\n`{err}`")
-            status = None
-    finally:
         if status:
             await asyncio.sleep(1)
             await status.delete()

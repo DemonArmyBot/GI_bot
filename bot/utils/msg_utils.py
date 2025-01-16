@@ -123,7 +123,7 @@ async def parse_and_send_rss(data: dict, chat_ids: list = None):
             except Exception:
                 await logger(Exception)
                 caption += f"\n\n>**Author:** __{author}__"
-            
+
         medias = build_media(caption, pics)
         expanded_chat = []
         for chat in chats:

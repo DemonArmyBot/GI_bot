@@ -106,7 +106,6 @@ async def parse_and_send_rss(data: dict, chat_ids: list = None):
         pics = await download_media_to_memory(*pic)
         content = data.get("content")
         summary = sanitize_text(data.get("summary"))
-        tgh_link = str()
         title = data.get("title")
         url = data.get("link")
         # auth_text = f" by {author}" if author else str()
@@ -118,8 +117,13 @@ async def parse_and_send_rss(data: dict, chat_ids: list = None):
                     content[:65430]
                     + "<strong>...<strong><br><br><strong>(TRUNCATED DUE TO CONTENT EXCEEDING MAX LENGTH)<strong>"
                 )
-            tgh_link = (await post_to_tgph(title, content))["url"]
-            caption += f"\n\n>**[Telegraph]({tgh_link})** __({author})__"
+            try:
+                tgh_link = (await post_to_tgph(title, content))["url"]
+                caption += f"\n\n>**[Telegraph]({tgh_link})** __({author})__"
+            except Exception:
+                await logger(Exception)
+                caption += f"\n\n>**Author:** __{author}__"
+            
         medias = build_media(caption, pics)
         expanded_chat = []
         for chat in chats:

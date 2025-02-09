@@ -128,8 +128,6 @@ async def _(client, message):
 
 async def start_bot():
     try:
-        loop = asyncio.get_event_loop()
-        asyncio.set_event_loop(loop)
         async with bot.client:
             bot.client.loop.run_until_complete(on_startup())
             LOGS.info("Bot has started.")
@@ -140,4 +138,5 @@ async def start_bot():
         exit()
 
 
-asyncio.run(start_bot())
+#asyncio.run(start_bot())
+bot.client.loop.run_until_complete(start_bot())

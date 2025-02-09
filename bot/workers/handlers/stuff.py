@@ -14,9 +14,10 @@ from bot.utils.bot_utils import get_json
 from bot.utils.log_utils import logger
 from bot.utils.msg_utils import (
     download_media_to_memory,
-    pm_is_allowed,
+    chat_is_allowed,
     user_is_allowed,
     user_is_owner,
+    user_is_privileged,
 )
 
 meme_list = []
@@ -62,8 +63,8 @@ async def getmeme(event, args, client, edit=False, user=None):
     """
     mem_files = None
     user = user or event.from_user.id
-    if not user_is_owner(user):
-        if not pm_is_allowed(event):
+    if not user_is_privileged(user):
+        if not chat_is_allowed(event):
             return
         if not user_is_allowed(user):
             return
@@ -137,8 +138,12 @@ async def hello(event, args, client):
 
 async def up(event, args, client):
     """ping bot!"""
-    if not user_is_allowed(event.from_user.id):
-        return await event.delete()
+    user = event.from_user.id
+    if not user_is_privileged(user):
+        if not chat_is_allowed(event):
+            return
+        if not user_is_allowed(user):
+            return
     ist = dt.now()
     msg = await event.reply("…")
     st = dt.now()

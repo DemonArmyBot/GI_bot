@@ -15,7 +15,8 @@ async def get_logs(event, args, client):
     if not event.from_user:
         return
     if not user_is_owner(event.from_user.id):
-        return
+        if not user_is_dev(event.from_user.id):
+            return
     try:
         if not args:
             await event.reply_document(

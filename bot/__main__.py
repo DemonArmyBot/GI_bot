@@ -10,9 +10,14 @@ from .workers.handlers.gi import (
     weapon_handler,
 )
 from .workers.handlers.manage import (
+    ban,
+    disable,
+    enable,
     pause_handler,
     restart_handler,
     rss_handler,
+    sudoers,
+    unban,
     update_handler,
 )
 from .workers.handlers.stuff import getmeme, hello, up
@@ -26,6 +31,31 @@ async def _(client, message):
 @bot.client.on_message(filters.incoming & filters.command(["pause"]))
 async def _(client, message):
     await event_handler(message, pause_handler)
+
+
+@bot.client.on_message(filters.incoming & filters.command(["ban"]))
+async def _(client, message):
+    await event_handler(message, ban)
+
+
+@bot.client.on_message(filters.incoming & filters.command(["disable"]))
+async def _(client, message):
+    await event_handler(message, disable)
+
+
+@bot.client.on_message(filters.incoming & filters.command(["enable"]))
+async def _(client, message):
+    await event_handler(message, enable)
+
+
+@bot.client.on_message(filters.incoming & filters.command(["sudo"]))
+async def _(client, message):
+    await event_handler(message, sudoers)
+
+
+@bot.client.on_message(filters.incoming & filters.command(["unban"]))
+async def _(client, message):
+    await event_handler(message, unban)
 
 
 @bot.client.on_message(filters.incoming & filters.command(["logs"]))

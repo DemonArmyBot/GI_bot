@@ -24,8 +24,9 @@ from .config import bot, conf
 
 bot_id = conf.BOT_TOKEN.split(":", 1)[0]
 local_gdb = ".local_giftdb.pkl"
+local_gcdb = ".local_groups.pkl"
 local_rdb = ".local_rssdb.pkl"
-local_budb = ".banned_users.pkl"
+local_budb = ".local_users.pkl"
 local_enkadb = ".local_enkadb.pkl"
 log_file_name = "logs.txt"
 rss_dict_lock = asyncio.Lock()

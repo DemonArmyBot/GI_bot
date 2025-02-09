@@ -25,8 +25,12 @@ class Config:
             )
             self.API_ID = config("API_ID", default="")
             self.API_HASH = config("API_HASH", default="")
-            self.BANNED = config(
-                "BANNED",
+            self.ALLOWED_CHATS = config(
+                "ALLOWED_CHATS",
+                default=str(),
+            )
+            self.BANNED_USERS = config(
+                "BANNED_USERS",
                 default=str(),
             )
             self.BLOCK_NSFW = config("BLOCK_NSFW", default=True, cast=bool)
@@ -37,6 +41,7 @@ class Config:
             self.DEV = config("DEV", default=0, cast=int)
             self.DYNO = config("DYNO", default=None)
             self.IGNORE_PM = config("IGNORE_PM", default=True, cast=bool)
+            self.LOG_GROUP = config("LOG_GROUP", default="")
             self.RSS_CHAT = config(
                 "RSS_CHAT",
                 default=str(),
@@ -61,11 +66,11 @@ class Runtime_Config:
     def __init__(self):
         self.author = None
         self.author_url = None
-        self.banned = []
         self.block_nsfw = False
         self.client = None
         self.docker_deployed = False
         self.enka_dict = {}
+        self.group_dict = {}
         self.ignore_pm = False
         self.max_message_length = 4096
         self.offline = False
@@ -73,6 +78,7 @@ class Runtime_Config:
         self.gift_dict = {}
         self.rss_dict = {}
         self.rss_ran_once = False
+        self.user_dict = {}
         self.version = None
 
 

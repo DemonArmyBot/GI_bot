@@ -31,13 +31,14 @@ from bot.utils.gi_utils import (
 )
 from bot.utils.log_utils import logger
 from bot.utils.msg_utils import (
+    chat_is_allowed,
     clean_reply,
     get_args,
     get_msg_from_codes,
-    pm_is_allowed,
     sanitize_text,
     user_is_allowed,
     user_is_owner,
+    user_is_privileged,
 )
 from bot.utils.os_utils import s_remove
 
@@ -58,7 +59,9 @@ async def enka_handler(event, args, client):
         -d or --dump: Dump all character build from the given uid
         -ls or --list: List all currently showcased characters
         -p or --profile: To get player card instead (v3 not supported)
-        --hide_uid: Hide uid in card
+        -f or --delete: Forget your uid
+        -s or --save: Remember your uid
+        -huid or --hide_uid: Hide uid in card
         --no_top: Remove akasha ranking from card
         --update: update library
 
@@ -74,11 +77,11 @@ async def enka_handler(event, args, client):
     error = None
     status = None
     user = event.from_user.id
-    if not user_is_owner(user):
-        if not pm_is_allowed(event):
+    if not user_is_privileged(user):
+        if not chat_is_allowed(event):
             return
         if not user_is_allowed(user):
-            return
+            return await event.react("⛔")
     try:
         arg, unknown = get_args(
             ["--hide_uid", "store_true"],
@@ -92,12 +95,17 @@ async def enka_handler(event, args, client):
             "--characters",
             ["-d", "store_true"],
             ["--dump", "store_true"],
+            ["-huid", "store_true"],
             ["-p", "store_true"],
             ["--profile", "store_true"],
             ["-v2", "store_true"],
             ["-v3", "store_true"],
             ["-ls", "store_true"],
             ["--list", "store_true"],
+            ["-s", "store_true"],
+            ["--save", "store_true"],
+            ["-f", "store_true"],
+            ["--delete", "store_true"],
             "-t",
             to_parse=args,
             get_unknown=True,
@@ -114,18 +122,48 @@ async def enka_handler(event, args, client):
         card = arg.c or arg.card or arg.character
         cards = arg.cs or arg.cards or arg.characters
         dump = arg.d or arg.dump
+        hide_uid = arg.huid or arg.hide_uid
         list_ = arg.ls or arg.list
         prof = arg.p or arg.profile
         akasha = arg.no_top
         reply = event.reply_to_message
+        delete = arg.f or arg.delete
+        save = arg.s or arg.save
+        vital_args = bool(card or cards or dump or prof or list_)
         if arg.update:
             u_reply = await event.reply("`Updating enka assets…`")
             await enka_update()
-            if not (card or cards or dump or prof):
+            if not vital_args:
                 return await u_reply.edit("Updated enka assets.")
             await u_reply.delete()
-        if not (card or cards or dump or prof or list_):
-            return await event.reply(f"```{getdoc(enka_handler)}```")
+        if uid and save:
+            will_save = True
+            if bot.user_dict.get(user, {}).get("genshin_uid") == uid:
+                await event.reply(f"**Warning:** This uid has already been saved")
+                will_save = False
+            elif prev_uid := bot.user_dict.get(user, {}).get("genshin_uid"):
+                await event.reply(
+                    f"**Info:** Overwriting previously saved uid: `{prev_uid}` with: `{uid}`…"
+                )
+            if will_save:
+                bot.user_dict.setdefault(user, {}).update(genshin_uid=uid)
+                await save2db2(bot.user_dict, "users")
+                await event.reply("**Saved your uid successfully!**")
+            if not vital_args:
+                return
+        if not uid:
+            uid = bot.user_dict.get(user, {}).get("genshin_uid", None)
+        if delete:
+            if not (saved_uid := bot.user_dict.get(user, {}).get("genshin_uid")):
+                await event.reply("**No saved uid was found to delete!**")
+            else:
+                bot.user_dict.setdefault(user, {}).update(genshin_uid=None)
+                await save2db2(bot.user_dict, "users")
+                await event.reply(f"**Saved UID:** `{saved_uid}` **has been deleted!**")
+            if not vital_args:
+                return
+        if not vital_args:
+            return await event.reply(getdoc(enka_handler))
         if not uid:
             if invalid:
                 await event.reply(f"`{invalid}`?")
@@ -146,9 +184,9 @@ async def enka_handler(event, args, client):
         status = await event.reply("`Fetching card(s), Please Wait…`")
         if prof:
             cprofile, error = (
-                await get_enka_profile(uid, card=True, template=arg.t)
+                await get_enka_profile(uid, card=True, template=arg.t, huid=hide_uid)
                 if not arg.v2
-                else await get_enka_profile2(uid, huid=arg.hide_uid)
+                else await get_enka_profile2(uid, huid=hide_uid)
             )
             if error:
                 return
@@ -181,12 +219,12 @@ async def enka_handler(event, args, client):
                 )
             char_id = info.get("id")
             if arg.v2:
-                result, error = await get_enka_card2(uid, char_id, arg.hide_uid)
+                result, error = await get_enka_card2(uid, char_id, hide_uid)
             elif arg.v3:
-                result, error = await get_enka_card3(uid, char_id)
+                result, error = await get_enka_card3(uid, char_id, hide_uid)
             else:
                 result, error = await get_enka_card(
-                    uid, char_id, akasha=akasha, huid=arg.hide_uid, template=arg.t
+                    uid, char_id, akasha=akasha, huid=hide_uid, template=arg.t
                 )
             if error:
                 return
@@ -210,7 +248,11 @@ async def enka_handler(event, args, client):
             for name in cards.split(","):
                 name = name.strip()
                 info = await get_gi_info(query=name)
-                info = await get_character_info_fallback(card) if not info else info
+                info = (
+                    await get_character_info_fallback(name)
+                    if not info and name.casefold() != "traveler"
+                    else info
+                )
                 if not info:
                     errors += f"{name}, "
                     continue
@@ -222,12 +264,12 @@ async def enka_handler(event, args, client):
                 return await event.reply(error_txt)
             ids = ids.strip(",")
             if arg.v2:
-                result, error = await get_enka_card2(uid, ids, huid=arg.hide_uid)
+                result, error = await get_enka_card2(uid, ids, huid=hide_uid)
             elif arg.v3:
-                result, error = await get_enka_card3(uid, ids)
+                result, error = await get_enka_card3(uid, ids, huid=hide_uid)
             else:
                 result, error = await get_enka_card(
-                    uid, ids, akasha=akasha, huid=arg.hide_uid, template=arg.t
+                    uid, ids, akasha=akasha, huid=hide_uid, template=arg.t
                 )
             if error:
                 return
@@ -244,12 +286,12 @@ async def enka_handler(event, args, client):
             return await send_multi_cards(event, reply, result, profile)
         if dump:
             if arg.v2:
-                result, error = await get_enka_card2(uid, str(), huid=arg.hide_uid)
+                result, error = await get_enka_card2(uid, str(), huid=hide_uid)
             elif arg.v3:
-                result, error = await get_enka_card3(uid, str())
+                result, error = await get_enka_card3(uid, str(), huid=hide_uid)
             else:
                 result, error = await get_enka_card(
-                    uid, None, akasha=akasha, huid=arg.hide_uid, template=arg.t
+                    uid, None, akasha=akasha, huid=hide_uid, template=arg.t
                 )
             if error:
                 return
@@ -294,8 +336,8 @@ async def weapon_handler(event, args, client):
     """
     status = None
     user = event.from_user.id
-    if not user_is_owner(user):
-        if not pm_is_allowed(event):
+    if not user_is_privileged(user):
+        if not chat_is_allowed(event):
             return
         if not user_is_allowed(user):
             return
@@ -322,7 +364,7 @@ async def weapon_handler(event, args, client):
 
 async def manage_autogift_chat(event, args, client):
     user = event.from_user.id
-    if not user_is_owner(user):
+    if not user_is_privileged(user):
         return
     try:
         msg = str()
@@ -380,8 +422,8 @@ async def getgiftcodes(event, args, client):
     if args:
         return await manage_autogift_chat(event, args, client)
     user = event.from_user.id
-    if not user_is_owner(user):
-        if not pm_is_allowed(event):
+    if not user_is_privileged(user):
+        if not chat_is_allowed(event):
             return
         if not user_is_allowed(user):
             return
@@ -451,8 +493,8 @@ async def get_events(event, args, client):
     """
     status = None
     user = event.from_user.id
-    if not user_is_owner(user):
-        if not pm_is_allowed(event):
+    if not user_is_privileged(user):
+        if not chat_is_allowed(event):
             return
         if not user_is_allowed(user):
             return
@@ -619,8 +661,8 @@ async def random_challenge(event, args, client):
     spec_char = None
     status = None
     user = event.from_user.id
-    if not user_is_owner(user):
-        if not pm_is_allowed(event):
+    if not user_is_privileged(user):
+        if not chat_is_allowed(event):
             return
         if not user_is_allowed(user):
             return

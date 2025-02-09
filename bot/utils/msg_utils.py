@@ -3,6 +3,7 @@ import io
 import itertools
 import re
 from functools import partial
+from inspect import getdoc
 
 from bs4 import BeautifulSoup
 from pyrogram.types import InputMediaPhoto, InputMediaVideo
@@ -17,9 +18,24 @@ from .gi_utils import async_dl
 from .log_utils import log, logger
 
 
+def chat_is_allowed(event):
+    if conf.ALLOWED_CHATS:
+        return str(event.chat.id) in conf.ALLOWED_CHATS
+    if event.chat.type.value == "private":
+        return not bot.ignore_pm
+    return not bot.group_dict.get(str(event.chat.id), {}).get("disabled", False)
+
+
 def user_is_allowed(user: str | int):
     user = str(user)
-    return user not in bot.banned
+    return not (
+        bot.user_dict.get(user, {}).get("banned", False) or user in conf.BANNED_USERS
+    )
+
+
+def user_is_dev(user: str | int):
+    user = int(user)
+    return user == conf.DEV
 
 
 def user_is_owner(user: str | int):
@@ -27,16 +43,21 @@ def user_is_owner(user: str | int):
     return user in conf.OWNER
 
 
-def user_is_dev(user):
-    user = int(user)
-    return user == conf.DEV
+def user_is_privileged(user):
+    return user_is_owner(user) or user_is_sudoer(user)
 
 
-def pm_is_allowed(event):
-    if event.chat.type.value == "private":
-        return not bot.ignore_pm
-    return True
+def user_is_sudoer(user: str | int):
+    user = str(user)
+    return bot.user_dict.get(user, {}).get("sudoer", False)
 
+
+async def get_user_info(user_name: str | int, id_only=False):
+    try:
+        user = await bot.client.get_users(user_name)
+        return user.id if id_only else user 
+    except Exception:
+        return
 
 def get_msg_from_codes(codes: list, auto: bool = False):
     msg = "**Genshin Impact Redeem Codes**\n\n"
@@ -55,7 +76,7 @@ async def download_media_to_memory(*pics):
     for pic in pics:
         try:
             name = pic.split("/")[-1]
-            if name.endswith(".png"):
+            if any(match in name for match in ("divider", "config", "line")):
                 continue
             media = await async_dl(pic)
             if name.endswith(".gif"):
@@ -110,7 +131,7 @@ async def parse_and_send_rss(data: dict, chat_ids: list = None):
         url = data.get("link")
         # auth_text = f" by {author}" if author else str()
         caption = f">**[{title}]({url})**"
-        caption += f"\n`{summary or str()}`"
+        caption += f"\n`{summary}`" if summary else str()
         if content:
             if len(content) > 65536:
                 content = (
@@ -274,5 +295,5 @@ async def event_handler(
     ):
         if disable_help:
             return
-        return await reply_message(event, f"`{function.__doc__}`")
+        return await reply_message(event, f"`{getdoc(function)}`")
     await function(event, args, client)

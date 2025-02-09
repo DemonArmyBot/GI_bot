@@ -1,5 +1,6 @@
 import asyncio
 import itertools
+from inspect import getdoc
 
 from feedparser import parse as feedparse
 
@@ -11,8 +12,12 @@ from bot.utils.msg_utils import (
     avoid_flood,
     event_handler,
     get_args,
+    get_user_info,
     try_delete,
+    user_is_allowed,
     user_is_owner,
+    user_is_privileged,
+    user_is_sudoer,
 )
 from bot.utils.os_utils import re_x, updater
 from bot.utils.rss_utils import schedule_rss, scheduler
@@ -20,7 +25,7 @@ from bot.utils.rss_utils import schedule_rss, scheduler
 
 async def restart_handler(event, args, client):
     """Restarts bot. (To avoid issues use /update instead.)"""
-    if not user_is_owner(event.from_user.id):
+    if not user_is_privileged(event.from_user.id):
         return
     try:
         rst = await event.reply("**Restarting Please Wait…**")
@@ -35,7 +40,7 @@ async def restart_handler(event, args, client):
 async def update_handler(event, args, client):
     """Fetches latest update for bot"""
     try:
-        if not user_is_owner(event.from_user.id):
+        if not user_is_privileged(event.from_user.id):
             return
         upt_mess = "Updating…"
         reply = await event.reply(f"`{upt_mess}`")
@@ -86,7 +91,7 @@ async def rss_handler(event, args, client):
         for additional help send the above arguments with -h/--help or without additional params.
         *listed in the order priority.
     """
-    if not user_is_owner(event.from_user.id):
+    if not user_is_privileged(event.from_user.id):
         return await try_delete(event)
     arg, args = get_args(
         ["-d", "store_true"],
@@ -121,7 +126,7 @@ async def rss_list(event, args, client):
         Returns:
             List of subscribed rss feeds.
     """
-    if not user_is_owner(event.from_user.id):
+    if not user_is_privileged(event.from_user.id):
         return
     if not bot.rss_dict:
         return await event.reply(
@@ -159,7 +164,7 @@ async def rss_get(event, args, client):
         [Title] - Title used in subscribing rss
         -a [Amount] - Amount of links to grab
     """
-    if not user_is_owner(event.from_user.id):
+    if not user_is_privileged(event.from_user.id):
         return
     arg, args = get_args(
         "-a",
@@ -229,7 +234,7 @@ async def rss_editor(event, args, client):
         Returns:
             success message on successfully editing the rss configuration
     """
-    if not user_is_owner(event.from_user.id):
+    if not user_is_privileged(event.from_user.id):
         return
     arg, args = get_args(
         "-l",
@@ -313,7 +318,7 @@ async def del_rss(event, args, client):
             Success message on successfull removal
             Not found message if TITLE passed was not found
     """
-    if not user_is_owner(event.from_user.id):
+    if not user_is_privileged(event.from_user.id):
         return
     if not bot.rss_dict.get(args):
         return await event.reply(f"'{args}' not found in list of subscribed rss feeds!")
@@ -344,7 +349,7 @@ async def rss_sub(event, args, client):
         Returns:
             success message on successfully subscribing to an rss feed
     """
-    if not user_is_owner(event.from_user.id):
+    if not user_is_privileged(event.from_user.id):
         return
     arg, args = get_args(
         "-t",
@@ -455,3 +460,203 @@ async def rss_sub(event, args, client):
     elif not scheduler.running:
         schedule_rss()
         scheduler.start()
+
+
+async def ban(event, args, client):
+    """
+    Ban the user from using the bot:
+    Argument:
+        *user_id/@mentions
+        or reply to the user's message
+
+    *user_id: user's telegram id
+    """
+    user = event.from_user.id
+    if not user_is_owner(user):
+        return
+    try:
+        if args and (" " in args or not (args.startswith("@") or args.isdigit())):
+            return await event.reply("**Please supply a valid id to ban**")
+        elif not (args or event.reply_to_message):
+            return await event.reply(
+                "**Reply to a message or supply an id to ban the user from using the bot.**"
+            )
+
+        ban_id = args or event.reply_to_message.from_user.id
+        ban_info = await get_user_info(ban_id)
+        ban_id = str(ban_info.id)
+        if not ban_info:
+            return await event.reply("**Invalid user_id**")
+        if user_is_owner(ban_id):
+            return await event.reply("**Why?**")
+        if user_is_sudoer(ban_id):
+            return await event.reply(f"@{ban_info.mention()} **is a Sudoer.**")
+        if not user_is_allowed(ban_id):
+            return await event.reply(
+                f"@{ban_info.mention()} **has already been banned from using the bot.**"
+            )
+        bot.user_dict.setdefault(ban_id, {}).update(banned=True)
+        await save2db2(bot.user_dict, "users")
+        return await event.reply(f"@{ban_info.mention()} **has been banned from using the bot.**")
+    except Exception:
+        await logger(Exception)
+
+
+async def unban(event, args, client):
+    """
+    Unban previously banned user:
+    Argument:
+        *user_id/@mentions
+        or reply to the user's message
+
+    *user_id: user's telegram id 
+    """
+    user = event.from_user.id
+    if not user_is_owner(user):
+        return
+    try:
+        if args and (" " in args or not (args.startswith("@") or args.isdigit())):
+            return await event.reply("**Please supply a valid id to unban**")
+        elif not (args or event.reply_to_message):
+            return await event.reply(
+                "**Reply to a message or supply an id to unban the user from using the bot.**"
+            )
+        ban_id = args or event.reply_to_message.from_user.id
+        ban_info = await get_user_info(ban_id)
+        if not ban_info:
+            return await event.reply("**Invalid user_id**")
+        ban_id = str(ban_info.id)
+        if user_is_owner(ban_id):
+            return await event.reply("**Why?**")
+        if user_is_sudoer(ban_id):
+            return await event.reply(f"@{ban_info.mention()} **is a Sudoer.**")
+        if user_is_allowed(ban_id):
+            return await event.reply(
+                f"@{ban_info.mention()} **was never banned from using the bot.**"
+            )
+        bot.user_dict.setdefault(ban_id, {}).update(banned=False)
+        await save2db2(bot.user_dict, "users")
+        return await event.reply(f"@{ban_info.mention()}'s *ban has been lifted.*")
+    except Exception:
+        await logger(Exception)
+
+
+async def disable(event, args, client):
+    "Disable bot replies in a group chat."
+    if event.chat.type.value == "private":
+        return
+    try:
+        user = event.from_user.id
+        user_info = await event.chat.get_member(user)
+        if not user_is_privileged(user):
+            if not user_info.privileges:
+                return await event.reply("`You're not allowed to do this.`")
+        chat_id = str(event.chat.id)
+        chat_name = event.chat.title
+        if not chat_is_allowed(event):
+            return await event.reply(
+                "Bot has already been disabled in this Group chat."
+            )
+        bot.group_dict.setdefault(chat_id, {}).update(disabled=True)
+        await save2db2(bot.group_dict, "groups")
+        await event.reply(f"Successfully disabled bot replies in group: **{chat_name}**")
+    except Exception:
+        await logger(Exception)
+
+
+async def enable(event, args, client):
+    "Enable bot replies in a group chat."
+    if not event.chat.is_group:
+        return
+    try:
+        user = event.from_user.id
+        user_info = await event.chat.get_member(user)
+        if not user_is_privileged(user):
+            if not user_info.privileges:
+                return await event.reply("`You're not allowed to do this.`")
+        chat_id = str(event.chat.id)
+        chat_name = event.chat.title
+        if chat_is_allowed(event):
+            return await event.reply("Bot is already enabled in this Group chat.")
+        bot.group_dict.setdefault(chat_id, {}).update(disabled=False)
+        await save2db2(bot.group_dict, "groups")
+        await event.reply(f"Successfully enabled bot replies in group: **{chat_name}**")
+    except Exception:
+        await logger(Exception)
+
+
+async def list_sudoers(event, args, client):
+    "Lists the sudoers."
+    msg = str()
+    for user in bot.user_dict.keys():
+        if not bot.user_dict.get(user, {}).get("sudoer", False):
+            continue
+        info = await get_user_info(user)
+        name = info.first_name
+        msg += f"\n**⁍** `{name}`"
+    if not msg:
+        resp = "**No sudoers found.*"
+    else:
+        resp = f"**List of sudoers:**{msg}"
+
+    for text in split_text(resp):
+        event = await event.reply(text)
+
+
+async def sudoers(event, args, client):
+    """
+    Modify sudoers
+    Arguments:
+        -a: Add user to sudoers
+        -rm Remove user from sudoers
+        {user_id}: ID* of user of user to add to sudoers (can also be specified through a tag); Replying the user message also works
+
+    *ID: user's phone number with country code without spaces or the initial '+'
+    """
+    user = event.from_user.id
+    if not user_is_owner(user):
+        return
+    try:
+        if not args:
+            return await list_sudoers(event, args, client)
+        arg, args = get_args(
+            ["-a", "store_true"],
+            ["-rm", "store_true"],
+            to_parse=args,
+            get_unknown=True,
+        )
+        if arg.a:
+            msg1 = "**Please supply a valid id to add to sudoers*"
+            msg2 = "**Reply to a message or supply an id to add the user to sudoers.*"
+        elif arg.rm:
+            msg1 = "**Please supply a valid id to remove from sudoers*"
+            msg2 = (
+                "**Reply to a message or supply an id to remove the user from sudoers.*"
+            )
+        else:
+            return await event.reply(getdoc(sudoers))
+        if args and (" " in args or not (args.startswith("@") or args.isdigit())):
+            return await event.reply(msg1)
+        elif not (args or event.reply_to_message):
+            return await event.reply(msg2)
+        _id = args or event.reply_to_message.from_user.id
+        _info = await get_user_info(_id)
+        if not _info:
+            return await event.reply("**Invalid user_id**")
+        _id = str(_info.id)
+        if user_is_owner(_id):
+            return await event.reply("**Why?**")
+        if arg.a:
+            if user_is_sudoer(_id):
+                return await event.reply(f"@{_info.mention()} **is already a Sudoer.**")
+            bot.user_dict.setdefault(_id, {}).update(sudoer=True)
+        if arg.rm:
+            if not user_is_sudoer(_id):
+                return await event.reply(f"@{_id} **is not a Sudoer.**")
+            bot.user_dict.setdefault(_id, {}).update(sudoer=False)
+        await save2db2(bot.user_dict, "users")
+        await event.reply(
+            f"@{_id} **has been successfully {'added to' if arg.a else 'removed from'} sudoers.**"
+        )
+    except Exception:
+        await logger(Exception)

@@ -62,8 +62,9 @@ if conf.DATABASE_URL:
     userdb = db["users"]
     miscdb = db["misc"]
 
-    load_db(userdb, "banned_users", bot.banned, "list")
+    load_db(userdb, "users", bot.user_dict, "dict")
     load_db(miscdb, "gift", bot.gift_dict, "dict")
+    load_db(userdb, "groups", bot.group_dict, "dict")
     load_db(rssdb, "rss", bot.rss_dict, "dict")
 
 

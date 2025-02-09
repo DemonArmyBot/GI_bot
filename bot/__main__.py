@@ -126,7 +126,7 @@ async def _(client, message):
 ########### Start ############
 
 try:
-    with bot.client:
+    async with bot.client:
         bot.client.loop.run_until_complete(on_startup())
         LOGS.info("Bot has started.")
         bot.client.loop.run_forever()

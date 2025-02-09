@@ -497,7 +497,9 @@ async def ban(event, args, client):
             )
         bot.user_dict.setdefault(ban_id, {}).update(banned=True)
         await save2db2(bot.user_dict, "users")
-        return await event.reply(f"@{ban_info.mention()} **has been banned from using the bot.**")
+        return await event.reply(
+            f"@{ban_info.mention()} **has been banned from using the bot.**"
+        )
     except Exception:
         await logger(Exception)
 
@@ -509,7 +511,7 @@ async def unban(event, args, client):
         *user_id/@mentions
         or reply to the user's message
 
-    *user_id: user's telegram id 
+    *user_id: user's telegram id
     """
     user = event.from_user.id
     if not user_is_owner(user):
@@ -559,7 +561,9 @@ async def disable(event, args, client):
             )
         bot.group_dict.setdefault(chat_id, {}).update(disabled=True)
         await save2db2(bot.group_dict, "groups")
-        await event.reply(f"Successfully disabled bot replies in group: **{chat_name}**")
+        await event.reply(
+            f"Successfully disabled bot replies in group: **{chat_name}**"
+        )
     except Exception:
         await logger(Exception)
 

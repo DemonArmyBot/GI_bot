@@ -1,7 +1,7 @@
 from pymongo.errors import ServerSelectionTimeoutError
 
 from bot import asyncio, bot_id
-from bot.config import bot, conf
+from bot.config import conf
 from bot.startup.before import miscdb, pickle, rssdb, userdb
 
 from .bot_utils import sync_to_async

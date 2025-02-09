@@ -55,9 +55,10 @@ def user_is_sudoer(user: str | int):
 async def get_user_info(user_name: str | int, id_only=False):
     try:
         user = await bot.client.get_users(user_name)
-        return user.id if id_only else user 
+        return user.id if id_only else user
     except Exception:
         return
+
 
 def get_msg_from_codes(codes: list, auto: bool = False):
     msg = "**Genshin Impact Redeem Codes**\n\n"

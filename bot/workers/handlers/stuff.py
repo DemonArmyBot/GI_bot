@@ -13,10 +13,9 @@ from bot import bot, pyro_errors
 from bot.utils.bot_utils import get_json
 from bot.utils.log_utils import logger
 from bot.utils.msg_utils import (
-    download_media_to_memory,
     chat_is_allowed,
+    download_media_to_memory,
     user_is_allowed,
-    user_is_owner,
     user_is_privileged,
 )
 

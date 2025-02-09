@@ -37,7 +37,6 @@ from bot.utils.msg_utils import (
     get_msg_from_codes,
     sanitize_text,
     user_is_allowed,
-    user_is_owner,
     user_is_privileged,
 )
 from bot.utils.os_utils import s_remove

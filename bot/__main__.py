@@ -129,7 +129,7 @@ async def _(client, message):
 async def start_bot():
     try:
         async with bot.client:
-            bot.client.loop.run_until_complete(on_startup())
+            await on_startup()
             LOGS.info("Bot has started.")
             bot.client.loop.run_forever()
     except Exception:

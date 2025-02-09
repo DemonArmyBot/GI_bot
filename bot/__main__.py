@@ -1,4 +1,4 @@
-from . import LOGS, asyncio, bot, filters, traceback
+from . import LOGS, bot, filters, traceback
 from .startup.after import on_startup
 from .utils.msg_utils import event_handler
 from .workers.handlers.dev import bash, eval_message, get_logs
@@ -138,5 +138,5 @@ async def start_bot():
         exit()
 
 
-#asyncio.run(start_bot())
+# asyncio.run(start_bot())
 bot.client.loop.run_until_complete(start_bot())

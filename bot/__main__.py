@@ -1,4 +1,4 @@
-from . import LOGS, asyncio,  bot, filters, traceback
+from . import LOGS, asyncio, bot, filters, traceback
 from .startup.after import on_startup
 from .utils.msg_utils import event_handler
 from .workers.handlers.dev import bash, eval_message, get_logs
@@ -125,6 +125,7 @@ async def _(client, message):
 
 ########### Start ############
 
+
 async def start_bot():
     try:
         async with bot.client:
@@ -135,5 +136,6 @@ async def start_bot():
         LOGS.critical(traceback.format_exc())
         LOGS.critical("Cannot recover from error, exiting…")
         exit()
+
 
 asyncio.run(start_bot())

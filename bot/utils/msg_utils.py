@@ -1,4 +1,5 @@
 import argparse
+import asyncio
 import io
 import itertools
 import re
@@ -78,6 +79,9 @@ async def download_media_to_memory(*pics):
         try:
             name = pic.split("/")[-1]
             if any(match in name for match in ("divider", "config", "line")):
+                continue
+            if not name.endswith((".png", ".jpg", ".gif")):
+                await logger(e=f"RSS: Unknown file type for link: {pic}")
                 continue
             media = await async_dl(pic)
             if name.endswith(".gif"):

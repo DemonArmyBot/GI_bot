@@ -88,6 +88,8 @@ async def download_media_to_memory(*pics):
             if name.endswith(".gif"):
                 media = await convert_gif_2_mp4(media)
                 name = name[:-3] + "mp4"
+            elif name.endswith(".webp"):
+                name = name[:-4] + "jpg"
             img = io.BytesIO(media)
             img.name = name
             in_mem.append(img)

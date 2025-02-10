@@ -77,10 +77,11 @@ async def download_media_to_memory(*pics):
     in_mem = []
     for pic in pics:
         try:
+            allowed_fts = (".gif", ".jpg", ".jpeg", ".png", ".webp")
             name = pic.split("/")[-1]
             if any(match in name for match in ("divider", "config", "line")):
                 continue
-            if not name.endswith((".png", ".jpg", ".gif")):
+            if not name.endswith(allowed_fts):
                 await logger(e=f"RSS: Unknown file type for link: {pic}")
                 continue
             media = await async_dl(pic)

@@ -7,7 +7,7 @@ def enquip():
         "Up!",
         "a coconut.",
         "the fastest bot alive.",
-        "ready to encode from dusk till dawn.",
+        "ready to theory craft from dusk till dawn.",
         "ready and awaiting orders, Sir! Yes Sir!",
         "feeling lucky+",
         "(technically) a noble bot.",

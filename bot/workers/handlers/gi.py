@@ -320,7 +320,7 @@ async def send_multi_cards(event, reply, results, profile):
         s_remove(path)
 
 
-def list_charcters(characters):
+def list_characters(characters):
     msg = "**List of Characters in Showcase:**\n"
     for character in characters:
         msg += f"**⁍** `{character}`\n"

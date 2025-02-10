@@ -131,7 +131,7 @@ async def start_bot():
         async with bot.client:
             await on_startup()
             LOGS.info("Bot has started.")
-            bot.client.idle()
+            await bot.idle()
     except Exception:
         LOGS.critical(traceback.format_exc())
         LOGS.critical("Cannot recover from error, exiting…")

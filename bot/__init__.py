@@ -17,7 +17,7 @@ from html_telegraph_poster import TelegraphPoster
 from html_telegraph_poster import errors as telegraph_errors
 from pyrogram import Client
 from pyrogram import errors as pyro_errors
-from pyrogram import filters
+from pyrogram import filters, idle
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 from .config import bot, conf
@@ -78,6 +78,7 @@ LOGS.info("Starting...")
 
 bot.ignore_pm = conf.IGNORE_PM
 bot.block_nsfw = conf.BLOCK_NSFW
+bot.idle = idle
 bot.tgp_client = TelegraphPoster(use_api=True, telegraph_api_url=conf.TELEGRAPH_API)
 
 try:

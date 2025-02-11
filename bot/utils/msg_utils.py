@@ -303,10 +303,12 @@ async def event_handler(
     split_args=" ",
     default_args: str = False,
     use_default_args=False,
+    pass_marked_text=False,
 ):
+    text = event.text if not pass_marked_text else event.text.markdown
     args = (
-        event.text.split(split_args, maxsplit=1)[1].strip()
-        if len(event.text.split()) > 1
+        text.split(split_args, maxsplit=1)[1].strip()
+        if len(text.split()) > 1
         else None
     )
     args = default_args if use_default_args and default_args is not False else args

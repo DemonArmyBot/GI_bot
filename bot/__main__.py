@@ -75,7 +75,7 @@ async def _(client, message):
 
 @bot.client.on_message(filters.incoming & filters.command("enka"))
 async def _(client, message):
-    await event_handler(message, enka_handler, require_args=True)
+    await event_handler(message, enka_handler, require_args=True, pass_marked_text=True)
 
 
 @bot.client.on_message(filters.incoming & filters.command("weapon"))

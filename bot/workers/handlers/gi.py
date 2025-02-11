@@ -34,7 +34,10 @@ from bot.utils.msg_utils import (
     chat_is_allowed,
     clean_reply,
     get_args,
+    get_mention,
     get_msg_from_codes,
+    get_user_info,
+    is_mention,
     sanitize_text,
     user_is_allowed,
     user_is_privileged,
@@ -48,7 +51,7 @@ async def enka_handler(event, args, client):
     Requires character build for the specified uid to be public
 
     Arguments:
-        uid: {genshin player uid} (Required)
+        uid/@mention: {genshin player uid} (Required)
         -c or --card or --character {character name}*: use quotes if the name has spaces eg:- "Hu tao"; Also supports lookups
         -cs or --cards or --characters {characters} same as -c but for multiple characters; delimited by commas
         -t <int> {template}: card generation template; currently only two templates exist; default 1
@@ -80,7 +83,7 @@ async def enka_handler(event, args, client):
         if not chat_is_allowed(event):
             return
         if not user_is_allowed(user):
-            return await event.react("⛔")
+            return
     try:
         arg, unknown = get_args(
             ["--hide_uid", "store_true"],
@@ -111,10 +114,17 @@ async def enka_handler(event, args, client):
         )
         unknowns = unknown.split()
         invalid = str()
+        mention = None
+        mentioned_id = None
+        r_mention = None
         uid = None
         for unkwn in unknowns:
             if unkwn.isdigit() and not uid:
                 uid = unkwn
+                continue
+            elif (unkwn.startswith("@") or (unkwn.startswith("[@") and is_mention(unkwn)))  and not mention:
+                mention = get_mention(unkwn)
+                r_mention = unkwn
                 continue
             invalid += f"{unkwn} "
         invalid = invalid.rstrip()
@@ -135,6 +145,14 @@ async def enka_handler(event, args, client):
             if not vital_args:
                 return await u_reply.edit("Updated enka assets.")
             await u_reply.delete()
+        if mention and uid:
+            await event.reply("`Ignoring your mention…`")
+        elif mention: 
+            mentioned = await get_user_info(mention)
+            not_found_err = "**No idea who {} is.**"
+            if not mentioned:
+                return await event.reply(not_found_err.format(r_mention))
+            mentioned_id = mentioned.id
         if uid and save:
             will_save = True
             if bot.user_dict.get(user, {}).get("genshin_uid") == uid:
@@ -151,7 +169,7 @@ async def enka_handler(event, args, client):
             if not vital_args:
                 return
         if not uid:
-            uid = bot.user_dict.get(user, {}).get("genshin_uid", None)
+            uid = bot.user_dict.get((mentioned_id or user), {}).get("genshin_uid", None)
         if delete:
             if not (saved_uid := bot.user_dict.get(user, {}).get("genshin_uid")):
                 await event.reply("**No saved uid was found to delete!**")
@@ -166,7 +184,11 @@ async def enka_handler(event, args, client):
         if not uid:
             if invalid:
                 await event.reply(f"`{invalid}`?")
-            return await event.reply(f"**Please supply a UID**")
+            if mention:
+                err_msg = f"**Error:** {mentioned.mention()} hasn't saved their uid!"
+            else:
+                err_msg = "**Please supply a UID**"
+            return await event.reply(err_msg)
         if invalid:
             await event.reply(f"**Warning:** No idea what '`{invalid}`' means.")
         if arg.t not in ("1", "2"):
@@ -180,7 +202,10 @@ async def enka_handler(event, args, client):
             await event.reply(characters)
             if not (card or cards or dump or prof):
                 return
-        status = await event.reply("`Fetching card(s), Please Wait…`")
+        status_msg = "`Fetching card(s)"
+        status_msg += f" for {mentioned.first_name}" if mention else str()
+        status_msg += ", Please Wait…`"
+        status = await event.reply(status_msg)
         if prof:
             cprofile, error = (
                 await get_enka_profile(uid, card=True, template=arg.t, huid=hide_uid)

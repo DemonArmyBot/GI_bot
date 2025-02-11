@@ -19,12 +19,28 @@ from .gi_utils import async_dl
 from .log_utils import log, logger
 
 
+name_regex = "[^]]+"
+url_regex = "tg?://[^)]+"
+markup_regex = '\[(@{0})]\(\s*({1})\s*\)'.format(name_regex, url_regex)
+
 def chat_is_allowed(event):
     if conf.ALLOWED_CHATS:
         return str(event.chat.id) in conf.ALLOWED_CHATS
     if event.chat.type.value == "private":
         return not bot.ignore_pm
     return not bot.group_dict.get(str(event.chat.id), {}).get("disabled", False)
+
+
+def get_mention(string: str):
+    if not string.startswith("@"):
+        match = re.search(markup_regex, string)
+        return match.groups(0)[1][13:] if match else None
+    else:
+        return string
+
+
+def is_mention(string: str):
+    return bool(get_mention(string))
 
 
 def user_is_allowed(user: str | int):
@@ -53,9 +69,9 @@ def user_is_sudoer(user: str | int):
     return bot.user_dict.get(user, {}).get("sudoer", False)
 
 
-async def get_user_info(user_name: str | int, id_only=False):
+async def get_user_info(user_id: str | int, id_only=False):
     try:
-        user = await bot.client.get_users(user_name)
+        user = await bot.client.get_users(user_id)
         return user.id if id_only else user
     except Exception:
         return

@@ -307,9 +307,7 @@ async def event_handler(
 ):
     text = event.text if not pass_marked_text else event.text.markdown
     args = (
-        text.split(split_args, maxsplit=1)[1].strip()
-        if len(text.split()) > 1
-        else None
+        text.split(split_args, maxsplit=1)[1].strip() if len(text.split()) > 1 else None
     )
     args = default_args if use_default_args and default_args is not False else args
     help_tuple = ("--help", "-h")

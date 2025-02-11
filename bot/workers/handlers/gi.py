@@ -122,7 +122,9 @@ async def enka_handler(event, args, client):
             if unkwn.isdigit() and not uid:
                 uid = unkwn
                 continue
-            elif (unkwn.startswith("@") or (unkwn.startswith("[@") and is_mention(unkwn)))  and not mention:
+            elif (
+                unkwn.startswith("@") or (unkwn.startswith("[@") and is_mention(unkwn))
+            ) and not mention:
                 mention = get_mention(unkwn)
                 r_mention = unkwn
                 continue
@@ -147,7 +149,7 @@ async def enka_handler(event, args, client):
             await u_reply.delete()
         if mention and uid:
             await event.reply("`Ignoring your mention…`")
-        elif mention: 
+        elif mention:
             mentioned = await get_user_info(mention)
             not_found_err = "**No idea who {} is.**"
             if not mentioned:

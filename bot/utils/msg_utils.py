@@ -18,10 +18,10 @@ from .bot_utils import convert_gif_2_mp4, gfn, post_to_tgph
 from .gi_utils import async_dl
 from .log_utils import log, logger
 
-
 name_regex = "[^]]+"
 url_regex = "tg?://[^)]+"
-markup_regex = '\[(@{0})]\(\s*({1})\s*\)'.format(name_regex, url_regex)
+markup_regex = "\\[(@{0})]\\(\\s*({1})\\s*\\)".format(name_regex, url_regex)
+
 
 def chat_is_allowed(event):
     if conf.ALLOWED_CHATS:

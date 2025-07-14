@@ -1,25 +1,22 @@
-# app.py
 import os
-import threading
-from flask import Flask
 import subprocess
+from flask import Flask
 
 app = Flask(__name__)
 port = int(os.environ.get("PORT", 5000))
 
-def run_bot():
-    """Run the bot using the existing run.sh script"""
-    subprocess.run(["./run.sh"], check=True)
+# Start bot in background when app loads
+print("🤖 Starting bot in background...")
+bot_process = subprocess.Popen(["./run.sh"])
 
 @app.route('/')
 def health_check():
-    """Health check endpoint for Render"""
-    return "🤖 Bot is running in web service mode! 🚀"
+    return "🚀 Bot is running in web service mode!"
+
+@app.route('/ping')
+def ping():
+    return "pong"
 
 if __name__ == '__main__':
-    # Start bot in background thread
-    bot_thread = threading.Thread(target=run_bot, daemon=True)
-    bot_thread.start()
-    
-    # Start Flask web server
+    print(f"🌐 Starting web service on port {port}")
     app.run(host='0.0.0.0', port=port)

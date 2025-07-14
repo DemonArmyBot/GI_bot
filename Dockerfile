@@ -26,3 +26,4 @@ RUN if [[ $(arch) == 'aarch64' ]]; then   dnf -qq -y history undo last; fi && dn
 
 # 7. Start bot
 CMD ["python","app.py"]
+RUN chmod +x run.sh

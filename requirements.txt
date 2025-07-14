@@ -9,7 +9,7 @@ lxml[html_clean]
 pymongo
 python-decouple
 pytz
-#pyrogram
+pyrogram
 tgcrypto
 git+https://github.com/Nubuki-all/ENCard
 git+https://github.com/Nubuki-all/EnkaCard

@@ -17,7 +17,7 @@ RUN arch=$(arch | sed s/aarch64/arm64/ | sed s/x86_64/64/) && \
 
 # 4. Copy files from repo to home directory
 COPY . .
-
+RUN chmod +x run.sh
 # 5. Install python3 requirements
 RUN pip3 install -r requirements.txt
 
@@ -26,4 +26,3 @@ RUN if [[ $(arch) == 'aarch64' ]]; then   dnf -qq -y history undo last; fi && dn
 
 # 7. Start bot
 CMD ["python","app.py"]
-RUN chmod +x run.sh

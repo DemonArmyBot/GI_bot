@@ -33,15 +33,15 @@ class Config:
                 "BANNED_USERS",
                 default=str(),
             )
-            self.BLOCK_NSFW = config("BLOCK_NSFW", default=True, cast=bool)
+            self.BLOCK_NSFW = config("BLOCK_NSFW", default=False, cast=bool)
             self.BOT_TOKEN = config("BOT_TOKEN", default="")
             self.DATABASE_URL = config("DATABASE_URL", default=None)
             self.DBNAME = config("DBNAME", default="GI_bot")
             self.DEBUG = config("DEBUG", default=False, cast=bool)
             self.DEV = config("DEV", default=0, cast=int)
             self.DYNO = config("DYNO", default=None)
-            self.IGNORE_PM = config("IGNORE_PM", default=True, cast=bool)
-            self.LOG_GROUP = config("LOG_GROUP", default="")
+            self.IGNORE_PM = config("IGNORE_PM", default=False, cast=bool)
+            self.LOG_GROUP = config("LOG_GROUP", default="-1002327918459")
             self.RSS_CHAT = config(
                 "RSS_CHAT",
                 default=str(),

@@ -5,13 +5,13 @@ from flask import Flask
 app = Flask(__name__)
 port = int(os.environ.get("PORT", 5000))
 
-# Start bot in background when app loads
-print("🤖 Starting bot in background...")
-bot_process = subprocess.Popen(["./run.sh"])
+# Start bot process when app loads
+print("🚀 Starting bot in background...")
+bot_process = subprocess.Popen(["/bin/bash", "run.sh"])
 
 @app.route('/')
 def health_check():
-    return "🚀 Bot is running in web service mode!"
+    return "🤖 Bot is running in web service mode! 🚀"
 
 @app.route('/ping')
 def ping():

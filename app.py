@@ -1,13 +1,22 @@
 import os
 import subprocess
 from flask import Flask
+import logging
 
 app = Flask(__name__)
 port = int(os.environ.get("PORT", 5000))
 
-# Start bot process when app loads
-print("🚀 Starting bot in background...")
-bot_process = subprocess.Popen(["/bin/bash", "run.sh"])
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# Start bot process
+try:
+    logger.info("🚀 Starting bot process...")
+    bot_process = subprocess.Popen(["/bin/bash", "run.sh"])
+    logger.info(f"🤖 Bot started with PID: {bot_process.pid}")
+except Exception as e:
+    logger.error(f"🔥 Failed to start bot: {str(e)}")
 
 @app.route('/')
 def health_check():
@@ -18,5 +27,5 @@ def ping():
     return "pong"
 
 if __name__ == '__main__':
-    print(f"🌐 Starting web service on port {port}")
+    logger.info(f"🌐 Starting web service on port {port}")
     app.run(host='0.0.0.0', port=port)

@@ -8,21 +8,26 @@ ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=Africa/Lagos
 ENV TERM=xterm
 
-# 2. Install Dependencies
-RUN dnf -qq -y update && dnf -qq -y install git bash xz wget curl python3-pip psmisc procps-ng && if [[ $(arch) == 'aarch64' ]]; then   dnf -qq -y install gcc python3-devel; fi && python3 -m pip install --upgrade pip setuptools
+# 2. Install Dependencies - ADD FLASK HERE
+RUN dnf -qq -y update && dnf -qq -y install git bash xz wget curl python3-pip psmisc procps-ng && \
+    if [[ $(arch) == 'aarch64' ]]; then dnf -qq -y install gcc python3-devel; fi && \
+    python3 -m pip install --upgrade pip setuptools Flask
 
 # 3. Install latest ffmpeg
 RUN arch=$(arch | sed s/aarch64/arm64/ | sed s/x86_64/64/) && \
-    wget -q https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-n7.1-latest-linux${arch}-gpl-7.1.tar.xz && tar -xvf *xz && cp *7.1/bin/* /usr/bin && rm -rf *xz && rm -rf *7.1
+    wget -q https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-n7.1-latest-linux${arch}-gpl-7.1.tar.xz && \
+    tar -xvf *xz && cp *7.1/bin/* /usr/bin && rm -rf *xz && rm -rf *7.1
 
 # 4. Copy files from repo to home directory
 COPY . .
-RUN chmod +x run.sh
-# 5. Install python3 requirements
-RUN pip3 install -r requirements.txt
+
+# 5. Fix permissions and install requirements
+RUN chmod +x run.sh && \
+    pip3 install -r requirements.txt && \
+    chmod a+rwx /bot
 
 # 6. cleanup for arm64
-RUN if [[ $(arch) == 'aarch64' ]]; then   dnf -qq -y history undo last; fi && dnf clean all
+RUN if [[ $(arch) == 'aarch64' ]]; then dnf -qq -y history undo last; fi && dnf clean all
 
 # 7. Start bot
 CMD ["python","app.py"]

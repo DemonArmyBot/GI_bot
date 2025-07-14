@@ -25,4 +25,4 @@ RUN pip3 install -r requirements.txt
 RUN if [[ $(arch) == 'aarch64' ]]; then   dnf -qq -y history undo last; fi && dnf clean all
 
 # 7. Start bot
-CMD ["bash","run.sh"]
+CMD ["python","app.py"]
